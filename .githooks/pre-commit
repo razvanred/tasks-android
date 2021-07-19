@@ -1,0 +1,20 @@
+#!/bin/sh
+
+echo "[pre-commit] Checking formatting issues"
+
+# run the spotlessCheck with the gradle wrapper
+case "$(uname -s)" in
+  CYGWIN*|MINGW32*|MSYS*|MINGW*)
+    ./gradlew.bat spotlessCheck --daemon
+    ;;
+
+  *)
+    ./gradlew spotlessCheck --daemon
+    ;;
+esac
+
+# store the last exit code in a variable
+RESULT=$?
+
+# return the './gradlew spotlessCheck' exit code
+exit $RESULT
