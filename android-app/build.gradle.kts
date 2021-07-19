@@ -4,12 +4,13 @@ plugins {
 }
 
 val appVersionCode = (rootProject.properties["sedici.tasks.versioncode"] as? String)?.toInt() ?: 1
+println("APK version code: $appVersionCode")
 
 android {
     compileSdk = 30
 
     defaultConfig {
-        applicationId = "app.sedici.largebutton.showcase"
+        applicationId = "app.sedici.tasks"
         minSdk = 21
         targetSdk = 30
         versionCode = appVersionCode
