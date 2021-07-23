@@ -11,15 +11,12 @@ android {
 
     defaultConfig {
         applicationId = "app.sedici.tasks"
-        minSdk = 21
+        minSdk = 24
         targetSdk = 30
         versionCode = appVersionCode
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
     buildTypes {
