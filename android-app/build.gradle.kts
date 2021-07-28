@@ -52,4 +52,6 @@ dependencies {
     implementation(libs.compose.material.material)
     implementation(libs.compose.ui.ui)
     implementation(libs.compose.ui.tooling)
+
+    implementation(projects.model)
 }
