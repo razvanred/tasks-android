@@ -1,3 +1,5 @@
+import app.sedici.tasks.buildsrc.Android
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -7,12 +9,12 @@ val appVersionCode = (rootProject.properties["sedici.tasks.versioncode"] as? Str
 println("APK version code: $appVersionCode")
 
 android {
-    compileSdk = 30
+    compileSdk = Android.compileSdk
 
     defaultConfig {
         applicationId = "app.sedici.tasks"
-        minSdk = 24
-        targetSdk = 30
+        minSdk = Android.minSdk
+        targetSdk = Android.targetSdk
         versionCode = appVersionCode
         versionName = "1.0"
 
@@ -54,4 +56,5 @@ dependencies {
     implementation(libs.compose.ui.tooling)
 
     implementation(projects.model)
+    implementation(projects.data.local.android.common)
 }
