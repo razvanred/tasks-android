@@ -2,7 +2,9 @@ import app.sedici.tasks.buildsrc.Android
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    kotlin("android")
+    kotlin("kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 val appVersionCode = (rootProject.properties["sedici.tasks.versioncode"] as? String)?.toInt() ?: 1
@@ -55,6 +57,12 @@ dependencies {
     implementation(libs.compose.ui.ui)
     implementation(libs.compose.ui.tooling)
 
+    implementation(libs.androidx.navigation.compose)
+
     implementation(projects.model)
     implementation(projects.data.local.android.common)
+
+    implementation(libs.dagger.hilt.android)
+    implementation(libs.androidx.hilt.navigationCompose)
+    kapt(libs.dagger.hilt.compiler)
 }
