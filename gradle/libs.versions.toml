@@ -31,6 +31,8 @@ compose-ui-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "com
 compose-material-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "compose" }
 compose-foundation-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout", version.ref = "compose" }
+compose-animation-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
 
 google-android-material-material = { group = "com.google.android.material", name = "material", version = "1.4.0" }
 

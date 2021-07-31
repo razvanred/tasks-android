@@ -1,4 +1,4 @@
-package app.sedici.tasks.ui.theme
+package app.sedici.tasks.common.compose.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

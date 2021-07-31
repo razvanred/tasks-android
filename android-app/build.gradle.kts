@@ -59,8 +59,9 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
-    implementation(projects.model)
-    implementation(projects.data.local.android.common)
+    implementation(projects.model) // TODO remove
+    implementation(projects.data.local.android.common) // TODO remove
+    implementation(projects.common.compose)
 
     implementation(libs.dagger.hilt.android)
     implementation(libs.androidx.hilt.navigationCompose)

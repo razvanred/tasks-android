@@ -4,6 +4,7 @@
     <bytecodeTargetLevel target="1.8">
       <module name="SediciTasks-Android.android-app" target="11" />
       <module name="SediciTasks-Android.buildSrc" target="11" />
+      <module name="SediciTasks-Android.common.compose" target="11" />
       <module name="SediciTasks-Android.data.local.android.common" target="11" />
     </bytecodeTargetLevel>
   </component>
