@@ -48,6 +48,15 @@ android {
 }
 
 dependencies {
+    implementation(projects.model) // TODO remove
+    implementation(projects.data.local.android.common) // TODO remove
+
+    implementation(projects.common.compose)
+    implementation(projects.common.resources)
+
+    implementation(projects.ui.tasks)
+    implementation(projects.ui.stats)
+
     implementation(libs.androidx.coreKtx)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.android.material.material)
@@ -56,12 +65,9 @@ dependencies {
     implementation(libs.compose.material.material)
     implementation(libs.compose.ui.ui)
     implementation(libs.compose.ui.tooling)
+    implementation(libs.compose.material.iconsext)
 
     implementation(libs.androidx.navigation.compose)
-
-    implementation(projects.model) // TODO remove
-    implementation(projects.data.local.android.common) // TODO remove
-    implementation(projects.common.compose)
 
     implementation(libs.dagger.hilt.android)
     implementation(libs.androidx.hilt.navigationCompose)
