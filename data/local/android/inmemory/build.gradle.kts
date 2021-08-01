@@ -4,6 +4,7 @@ plugins {
     id("com.android.library")
     kotlin("android")
     kotlin("kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -11,19 +12,9 @@ android {
 
     defaultConfig {
         minSdk = Android.minSdk
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-            }
-        }
     }
 
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -33,11 +24,10 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring(libs.android.tools.desugar)
+    implementation(projects.data.local.android.common)
 
-    implementation(libs.androidx.room.ktx)
-    api(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
 
-    api(projects.data.local.common)
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
 }

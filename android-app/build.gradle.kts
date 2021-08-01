@@ -72,4 +72,7 @@ dependencies {
     implementation(libs.dagger.hilt.android)
     implementation(libs.androidx.hilt.navigationCompose)
     kapt(libs.dagger.hilt.compiler)
+
+    debugImplementation(projects.data.local.android.inmemory) // TODO remove
+    releaseImplementation(projects.data.local.android.ondevice) // TODO remove
 }
