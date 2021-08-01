@@ -16,7 +16,7 @@ plugins {
 	id("com.github.ben-manes.versions") version "0.39.0"
 }
 
-allprojects {
+subprojects {
 	repositories {
 		google()
 		mavenCentral()
@@ -28,6 +28,8 @@ allprojects {
 		kotlin {
 			target("**/*.kt")
 			ktlint(libs.versions.ktlint.get())
+			licenseHeaderFile rootProject.file("spotless/copyright.kt")
+			targetExclude("spotless/copyright.kt")
 		}
 
 		kotlinGradle {

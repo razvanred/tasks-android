@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Răzvan Roșu
+ * Copyright $YEAR Răzvan Roșu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,3 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.model
-
-@JvmInline
-value class TaskId(val value: ULong)
