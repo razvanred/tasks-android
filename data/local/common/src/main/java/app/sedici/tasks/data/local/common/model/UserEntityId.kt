@@ -1,3 +1,3 @@
 package app.sedici.tasks.data.local.common.model
 
-typealias UserEntityId = Long
+data class UserEntityId(val value: Long)
