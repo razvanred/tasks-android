@@ -1,4 +1,4 @@
-package app.sedici.tasks.home
+package app.sedici.tasks.ui.home
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
