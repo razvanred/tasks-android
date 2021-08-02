@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.data.local.common.model
+package app.sedici.tasks.base.android.di
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import app.sedici.tasks.data.local.common.model.UserEntity.Companion.TableName
+import app.sedici.tasks.base.common.scopes.AuthSessionScope
+import app.sedici.tasks.model.AccountId
+import dagger.BindsInstance
+import dagger.hilt.DefineComponent
+import dagger.hilt.components.SingletonComponent
 
-@Entity(
-    tableName = TableName,
-)
-data class UserEntity(
-    @PrimaryKey
-    val id: UserEntityId,
-    val name: String,
-) {
-    companion object {
-        const val TableName = "Users"
+@AuthSessionScope
+@DefineComponent(parent = SingletonComponent::class)
+interface AuthSessionComponent {
+
+    @DefineComponent.Builder
+    interface Builder {
+        fun accountId(@BindsInstance accountId: AccountId): Builder
+
+        fun build(): AuthSessionComponent
     }
 }

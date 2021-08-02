@@ -16,5 +16,7 @@
 
 package app.sedici.tasks.model
 
-@JvmInline
-value class UserId(val value: ULong)
+data class Account(
+    val id: AccountId,
+    val name: String,
+)

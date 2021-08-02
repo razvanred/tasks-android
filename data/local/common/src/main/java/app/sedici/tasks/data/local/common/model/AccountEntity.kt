@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.model
+package app.sedici.tasks.data.local.common.model
 
-data class User(
-    val id: UserId,
-    val name: String,
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import app.sedici.tasks.data.local.common.model.AccountEntity.Companion.TableName
+
+@Entity(
+    tableName = TableName,
 )
+data class AccountEntity(
+    @PrimaryKey
+    val id: AccountEntityId,
+    val name: String,
+) {
+    companion object {
+        const val TableName = "Accounts"
+    }
+}

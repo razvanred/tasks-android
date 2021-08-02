@@ -17,8 +17,8 @@
 package app.sedici.tasks.data.local.android.common
 
 import androidx.room.TypeConverter
+import app.sedici.tasks.data.local.common.model.AccountEntityId
 import app.sedici.tasks.data.local.common.model.TaskEntityId
-import app.sedici.tasks.data.local.common.model.UserEntityId
 import java.time.OffsetDateTime
 
 object SediciTasksTypeConverters {
@@ -35,11 +35,12 @@ object SediciTasksTypeConverters {
 
     @TypeConverter
     @JvmStatic
-    fun userEntityIdToValue(userEntityId: UserEntityId?): Long? = userEntityId?.value
+    fun accountEntityIdToValue(accountEntityId: AccountEntityId?): Long? = accountEntityId?.value
 
     @TypeConverter
     @JvmStatic
-    fun userEntityIdFromValue(value: Long?): UserEntityId? = value?.let { UserEntityId(value = it) }
+    fun accountEntityIdFromValue(value: Long?): AccountEntityId? =
+        value?.let { AccountEntityId(value = it) }
 
     @TypeConverter
     @JvmStatic

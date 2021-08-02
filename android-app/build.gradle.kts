@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-    implementation(projects.model) // TODO remove
+    implementation(projects.base.android)
     implementation(projects.data.local.android.common) // TODO remove
 
     implementation(projects.common.compose)

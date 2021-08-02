@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.data.local.common.model
+package app.sedici.tasks.base.common.scopes
 
-data class UserEntityId(val value: Long)
+import javax.inject.Scope
+
+@Retention(AnnotationRetention.BINARY)
+@Scope
+annotation class AuthSessionScope

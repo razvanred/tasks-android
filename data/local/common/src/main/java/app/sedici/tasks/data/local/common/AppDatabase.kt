@@ -16,8 +16,8 @@
 
 package app.sedici.tasks.data.local.common
 
-import app.sedici.tasks.data.local.common.daos.UserDao
+import app.sedici.tasks.data.local.common.daos.AccountDao
 
 interface AppDatabase {
-    fun userDao(): UserDao
+    fun userDao(): AccountDao
 }

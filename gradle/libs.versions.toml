@@ -42,3 +42,5 @@ android-tools-desugar = { group = "com.android.tools", name = "desugar_jdk_libs"
 dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
 dagger-hilt-gradlePlugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "dagger" }
+dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
+dagger-dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }

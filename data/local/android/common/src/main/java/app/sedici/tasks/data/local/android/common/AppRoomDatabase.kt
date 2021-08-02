@@ -20,11 +20,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import app.sedici.tasks.data.local.common.AppDatabase
-import app.sedici.tasks.data.local.common.model.UserEntity
+import app.sedici.tasks.data.local.common.model.AccountEntity
 
 @Database(
     entities = [
-        UserEntity::class,
+        AccountEntity::class,
     ],
     version = 1,
     exportSchema = true,

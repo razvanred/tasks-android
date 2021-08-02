@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.data.local.android.common
+package app.sedici.tasks.model
 
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import app.sedici.tasks.data.local.common.UserDatabase
-import app.sedici.tasks.data.local.common.model.TaskEntity
-
-@Database(
-    entities = [
-        TaskEntity::class,
-    ],
-    version = 1,
-    exportSchema = true,
-)
-@TypeConverters(SediciTasksTypeConverters::class)
-abstract class UserRoomDatabase : RoomDatabase(), UserDatabase
+@JvmInline
+value class AccountId(val value: ULong)
