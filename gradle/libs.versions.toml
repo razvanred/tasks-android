@@ -7,7 +7,7 @@ dagger = "2.38.1"
 androidxhilt = "1.0.0"
 
 [libraries]
-android-gradlePlugin = "com.android.tools.build:gradle:7.1.0-alpha05"
+android-gradlePlugin = "com.android.tools.build:gradle:7.1.0-alpha06"
 
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
