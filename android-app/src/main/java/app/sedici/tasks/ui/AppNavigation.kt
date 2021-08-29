@@ -22,18 +22,12 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
-import app.sedici.tasks.ui.stats.Stats
+import app.sedici.tasks.ui.createtask.CreateTask
 import app.sedici.tasks.ui.tasks.Tasks
 
 internal sealed class Screen(val route: String) {
-    object Tasks : Screen("tasksroot")
-    object Stats : Screen("statsroot")
-}
-
-private sealed class LeafScreen(val route: String) {
-    object Tasks : LeafScreen("tasks")
-    object Stats : LeafScreen("stats")
+    object Tasks : Screen("tasks")
+    object CreateTask : Screen("new_task")
 }
 
 @Composable
@@ -44,41 +38,27 @@ internal fun AppNavigation(
         navController = navController,
         startDestination = Screen.Tasks.route
     ) {
-        addTasksTopLevel(navController = navController)
-        addStatsTopLevel(navController = navController)
+        addTasks(navController = navController)
+        addCreateTask(navController = navController)
     }
 }
 
-private fun NavGraphBuilder.addTasksTopLevel(
+private fun NavGraphBuilder.addTasks(
     navController: NavController,
 ) {
-    navigation(
-        route = Screen.Tasks.route,
-        startDestination = LeafScreen.Tasks.route
-    ) {
-        addTasks()
+    composable(route = Screen.Tasks.route) {
+        Tasks(
+            openCreateTask = {
+                navController.navigate(Screen.CreateTask.route)
+            }
+        )
     }
 }
 
-private fun NavGraphBuilder.addTasks() {
-    composable(route = LeafScreen.Tasks.route) {
-        Tasks()
-    }
-}
-
-private fun NavGraphBuilder.addStatsTopLevel(
+private fun NavGraphBuilder.addCreateTask(
     navController: NavController,
 ) {
-    navigation(
-        route = Screen.Stats.route,
-        startDestination = LeafScreen.Stats.route
-    ) {
-        addStats()
-    }
-}
-
-private fun NavGraphBuilder.addStats() {
-    composable(route = LeafScreen.Stats.route) {
-        Stats()
+    composable(route = Screen.CreateTask.route) {
+        CreateTask(navigateUp = navController::navigateUp)
     }
 }

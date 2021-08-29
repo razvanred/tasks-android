@@ -55,7 +55,7 @@ dependencies {
     implementation(projects.common.resources)
 
     implementation(projects.ui.tasks)
-    implementation(projects.ui.stats)
+    implementation(projects.ui.createTask)
 
     implementation(libs.androidx.coreKtx)
     implementation(libs.androidx.appcompat)

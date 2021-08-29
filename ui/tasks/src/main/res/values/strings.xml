@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tasks_screen_title">Tasks</string>
+    <string name="tasks_screen_button_add_task">Add task</string>
+</resources>

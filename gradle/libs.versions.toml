@@ -5,6 +5,7 @@ ktlint = "0.41.0"
 room = "2.4.0-alpha04"
 dagger = "2.38.1"
 androidxhilt = "1.0.0"
+androidxlifecycle = "2.4.0-alpha03"
 
 [libraries]
 android-gp = "com.android.tools.build:gradle:7.1.0-alpha10"
@@ -20,6 +21,11 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxlifecycle" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidxlifecycle" }
+androidx-lifecycle-viewmodel-savedstate = { module = "androidx.lifecycle:lifecycle-viewmodel-savedstate", version.ref = "androidxlifecycle" }
+androidx-lifecycle-common-java8 = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "androidxlifecycle" }
 
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxhilt" }
 
