@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_task_screen_title">Create new task</string>
+    <string name="create_task_title_field_placeholder">Title</string>
+    <string name="create_task_description_field_placeholder">Description</string>
+    <string name="create_task_expires_on_title_date_picker">Select an expiration date</string>
+    <string name="create_task_expires_on_field_title">Expires on</string>
+    <string name="create_task_expires_on_field_no_value_label">No expiration date</string>
+</resources>

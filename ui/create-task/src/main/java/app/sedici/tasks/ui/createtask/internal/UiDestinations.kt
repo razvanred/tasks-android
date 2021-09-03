@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.stats
+package app.sedici.tasks.ui.createtask.internal
 
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-
-@HiltViewModel
-class StatsViewModel @Inject constructor() : ViewModel()
+internal sealed interface UiDestination {
+    object Up : UiDestination
+}

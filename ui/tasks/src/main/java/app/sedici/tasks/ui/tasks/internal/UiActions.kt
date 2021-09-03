@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui
+package app.sedici.tasks.ui.tasks.internal
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import app.sedici.tasks.common.compose.theme.TasksAppTheme
-import app.sedici.tasks.ui.home.HomeScreen
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            TasksAppTheme {
-                HomeScreen()
-            }
-        }
-    }
-}
+internal sealed interface UiAction

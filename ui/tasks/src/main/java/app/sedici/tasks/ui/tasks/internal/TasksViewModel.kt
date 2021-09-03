@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.tasks
+package app.sedici.tasks.ui.tasks.internal
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class TasksViewModel @Inject constructor() : ViewModel()
+internal class TasksViewModel @Inject constructor() : ViewModel() {
+
+    private val pendingActions = MutableSharedFlow<UiAction>()
+
+    fun submitUiAction(uiAction: UiAction) {
+        viewModelScope.launch {
+            pendingActions.emit(uiAction)
+        }
+    }
+}

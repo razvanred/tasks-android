@@ -32,6 +32,7 @@ android {
 dependencies {
     implementation(projects.common.compose)
     implementation(projects.common.resources)
+    implementation(projects.model) // TODO remove when creating :domain module
 
     implementation(libs.compose.foundation.foundation)
     implementation(libs.compose.foundation.layout)
@@ -42,4 +43,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigationCompose)
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.compiler)
+
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.common.java8)
 }

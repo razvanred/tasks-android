@@ -18,34 +18,64 @@ package app.sedici.tasks.ui.tasks
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExtendedFloatingActionButton
+import androidx.compose.material.FabPosition
+import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.sedici.tasks.ui.tasks.internal.TasksViewModel
 
 @Composable
-fun Tasks() {
+fun Tasks(
+    openCreateTask: () -> Unit,
+) {
     Tasks(
-        viewModel = hiltViewModel()
+        viewModel = hiltViewModel(),
+        openCreateTask = openCreateTask,
     )
 }
 
 @Composable
-internal fun Tasks(viewModel: TasksViewModel) {
+internal fun Tasks(
+    viewModel: TasksViewModel,
+    openCreateTask: () -> Unit,
+) {
     Scaffold(
         topBar = {
             TasksAppBar()
         },
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(text = "Hello from ${stringResource(R.string.tasks_title)}!")
+        modifier = Modifier.fillMaxSize(),
+        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                text = {
+                    Text(text = stringResource(R.string.tasks_screen_button_add_task))
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null
+                    )
+                },
+                onClick = {
+                    openCreateTask()
+                }
+            )
+        },
+        content = {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(text = "Hello from ${stringResource(R.string.tasks_screen_title)}!")
+            }
         }
-    }
+    )
 }
 
 @Composable
@@ -54,7 +84,7 @@ private fun TasksAppBar(
 ) {
     TopAppBar(
         modifier = modifier,
-        title = { Text(text = stringResource(R.string.tasks_title)) },
+        title = { Text(text = stringResource(R.string.tasks_screen_title)) },
     )
 }
 

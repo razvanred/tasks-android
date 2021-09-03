@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="tasks_title">Tasks</string>
-    <string name="cd_tasks_title">Tasks</string>
-
-    <string name="stats_title">Stats</string>
-    <string name="cd_stats_title">Stats</string>
+    <string name="cd_navigate_up">Go back</string>
+    <string name="cd_cancel">@android:string/cancel</string>
+    <string name="cd_save">Save</string>
+    <string name="cd_clear">Clear</string>
+    <string name="cd_select_date">Select date</string>
 </resources>

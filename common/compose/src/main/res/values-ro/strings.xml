@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="confirm_discard_changes_dialog_title">Șterge modificări</string>
+    <string name="confirm_discard_changes_dialog_message">Toate modificările se vor pierde</string>
+    <string name="confirm_discard_changes_dialog_discard_button">Șterge</string>
+    <string name="confirm_discard_changes_dialog_cancel_button">@android:string/cancel</string>
+</resources>

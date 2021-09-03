@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_task_screen_title">Creați nouă activitate</string>
+    <string name="create_task_title_field_placeholder">Titlu</string>
+    <string name="create_task_description_field_placeholder">Descriere</string>
+    <string name="create_task_expires_on_title_date_picker">Selectați o dată de expirare</string>
+    <string name="create_task_expires_on_field_title">Dată de expirare</string>
+    <string name="create_task_expires_on_field_no_value_label">Fără dată de expirare</string>
+</resources>
