@@ -16,9 +16,11 @@
 
 package app.sedici.tasks.ui.createtask.internal
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.input.TextFieldValue
 import java.time.LocalDate
 
+@Stable
 data class UiState(
     val title: TextFieldValue,
     val description: TextFieldValue,

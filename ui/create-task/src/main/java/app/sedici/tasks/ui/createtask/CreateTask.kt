@@ -107,7 +107,7 @@ internal fun CreateTask(
         pendingUiDestinationFlow.flowWithLifecycle(lifecycle)
     }
 
-    LaunchedEffect(pendingUiDestinationFlowLifecycleAware) {
+    LaunchedEffect(lifecycle) {
         pendingUiDestinationFlowLifecycleAware.collect { destination ->
             when (destination) {
                 UiDestination.Up -> onBack()
