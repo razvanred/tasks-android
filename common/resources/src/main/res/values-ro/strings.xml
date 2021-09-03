@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="cd_navigate_up">Întoarce-te înapoi</string>
+    <string name="cd_cancel">@android:string/cancel</string>
+    <string name="cd_save">Salvați</string>
+    <string name="cd_clear">Ștergeți</string>
+    <string name="cd_select_date">Selectați dată</string>
 </resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="confirm_discard_changes_dialog_title">Elimina modifiche</string>
+    <string name="confirm_discard_changes_dialog_message">Tutte le modifiche andranno perse</string>
+    <string name="confirm_discard_changes_dialog_discard_button">Elimina</string>
+    <string name="confirm_discard_changes_dialog_cancel_button">@android:string/cancel</string>
+</resources>

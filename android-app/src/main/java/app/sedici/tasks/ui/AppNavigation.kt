@@ -59,6 +59,6 @@ private fun NavGraphBuilder.addCreateTask(
     navController: NavController,
 ) {
     composable(route = Screen.CreateTask.route) {
-        CreateTask(navigateUp = navController::navigateUp)
+        CreateTask(onBack = navController::navigateUp)
     }
 }

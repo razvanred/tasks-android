@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="confirm_discard_changes_dialog_title">Discard changes</string>
+    <string name="confirm_discard_changes_dialog_message">Any changes made will be lost</string>
+    <string name="confirm_discard_changes_dialog_discard_button">Discard</string>
+    <string name="confirm_discard_changes_dialog_cancel_button">@android:string/cancel</string>
+</resources>
