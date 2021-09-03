@@ -66,8 +66,6 @@ internal class CreateTaskViewModel @Inject constructor() : ViewModel() {
     private val _pendingUiDestination = MutableSharedFlow<UiDestination>()
     val pendingUiDestination = _pendingUiDestination.asSharedFlow()
 
-    private val navigateUp = suspend { _pendingUiDestination.emit(UiDestination.Up) }
-
     init {
         viewModelScope.launch {
             pendingUiAction.collect { uiAction ->
@@ -88,7 +86,7 @@ internal class CreateTaskViewModel @Inject constructor() : ViewModel() {
                         if (uiState.shouldShowConfirmDiscardChangesDialog) {
                             showConfirmDiscardChangesDialog.emit(true)
                         } else {
-                            navigateUp()
+                            _pendingUiDestination.emit(UiDestination.Up)
                         }
                     }
                     UiAction.CancelDiscardChanges -> {
@@ -96,7 +94,7 @@ internal class CreateTaskViewModel @Inject constructor() : ViewModel() {
                     }
                     UiAction.ConfirmDiscardChanges -> {
                         showConfirmDiscardChangesDialog.emit(false)
-                        navigateUp()
+                        _pendingUiDestination.emit(UiDestination.Up)
                     }
                 }
             }
