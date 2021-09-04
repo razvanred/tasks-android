@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.model
+package app.sedici.tasks.base.common
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-
-data class Task(
-    val id: TaskId,
-    val title: String,
-    val description: String,
-    val isChecked: Boolean,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
-    val expiresOn: LocalDate?,
-)
+sealed interface InvokeStatus
+object InvokeStarted : InvokeStatus
+object InvokeSuccess : InvokeStatus
+data class InvokeError(val throwable: Throwable) : InvokeStatus

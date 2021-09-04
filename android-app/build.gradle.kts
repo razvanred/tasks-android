@@ -75,4 +75,6 @@ dependencies {
 
     debugImplementation(projects.data.local.android.inmemory) // TODO remove
     releaseImplementation(projects.data.local.android.ondevice) // TODO remove
+
+    implementation(libs.kotlinx.coroutines.android)
 }

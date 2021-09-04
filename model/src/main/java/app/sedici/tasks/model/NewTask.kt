@@ -17,14 +17,9 @@
 package app.sedici.tasks.model
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 
-data class Task(
-    val id: TaskId,
+data class NewTask(
     val title: String,
     val description: String,
-    val isChecked: Boolean,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
     val expiresOn: LocalDate?,
 )

@@ -26,8 +26,8 @@ import java.time.OffsetDateTime
     tableName = TableName,
 )
 data class TaskEntity(
-    @PrimaryKey
-    val id: TaskEntityId,
+    @PrimaryKey(autoGenerate = true)
+    var id: TaskEntityId = TaskEntityId(value = -1L),
     val title: String,
     val description: String,
     @ColumnInfo(name = "is_checked")

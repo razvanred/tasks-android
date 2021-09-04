@@ -34,6 +34,7 @@ dependencies {
     implementation(projects.common.compose)
     implementation(projects.common.resources)
     implementation(projects.base.android)
+    implementation(projects.domain)
 
     implementation(libs.compose.foundation.foundation)
     implementation(libs.compose.foundation.layout)
