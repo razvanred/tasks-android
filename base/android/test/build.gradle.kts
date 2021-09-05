@@ -23,6 +23,8 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.android.tools.desugar)
+
     api(projects.base.android)
     api(libs.dagger.hilt.android.testing)
 
