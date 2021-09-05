@@ -69,7 +69,6 @@ jobs:
     strategy:
       matrix:
         api-level:
-          - 21
           - 24
           - 26
           - 29
