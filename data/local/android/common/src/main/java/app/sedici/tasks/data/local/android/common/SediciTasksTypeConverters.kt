@@ -44,9 +44,9 @@ object SediciTasksTypeConverters {
 
     @TypeConverter
     @JvmStatic
-    fun taskEntityIdToValue(taskEntityId: TaskEntityId?): Long? = taskEntityId?.value
+    fun taskEntityIdToValue(taskEntityId: TaskEntityId?): String? = taskEntityId?.value
 
     @TypeConverter
     @JvmStatic
-    fun taskEntityIdFromValue(value: Long?): TaskEntityId? = value?.let { TaskEntityId(value = it) }
+    fun taskEntityIdFromValue(value: String?): TaskEntityId? = value?.let { TaskEntityId(value = it) }
 }

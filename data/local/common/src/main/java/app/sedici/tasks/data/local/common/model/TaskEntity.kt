@@ -26,6 +26,8 @@ import java.time.OffsetDateTime
     tableName = TableName,
 )
 data class TaskEntity(
+    @PrimaryKey
+    val id: TaskEntityId = TaskEntityId.create(),
     val title: String,
     val description: String,
     @ColumnInfo(name = "is_checked")
@@ -37,9 +39,6 @@ data class TaskEntity(
     @ColumnInfo(name = "expires_on")
     val expiresOn: OffsetDateTime?,
 ) {
-    @PrimaryKey(autoGenerate = true)
-    lateinit var id: TaskEntityId
-
     companion object {
         const val TableName = "Tasks"
     }

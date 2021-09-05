@@ -39,6 +39,7 @@ jobs:
               spotlessCheck \
               assemble bundle \
               android-app:lintDebug testDebug
+              phoneGroupDebugAndroidTest
 
       - name: Upload build outputs
         if: always()

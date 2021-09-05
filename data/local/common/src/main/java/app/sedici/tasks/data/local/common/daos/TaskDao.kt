@@ -20,7 +20,10 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.IGNORE
+import androidx.room.Query
+import androidx.room.Update
 import app.sedici.tasks.data.local.common.model.TaskEntity
+import app.sedici.tasks.data.local.common.model.TaskEntity.Companion.TableName as Tasks
 
 @Dao
 interface TaskDao {
@@ -32,4 +35,10 @@ interface TaskDao {
 
     @Delete
     suspend fun delete(task: TaskEntity)
+
+    @Update
+    suspend fun update(task: TaskEntity)
+
+    @Query("SELECT * FROM $Tasks")
+    suspend fun getAll(): List<TaskEntity>
 }
