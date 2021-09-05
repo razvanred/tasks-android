@@ -38,7 +38,7 @@ jobs:
           ./gradlew -Psedici.tasks.versioncode=$BUILD_NUMBER --stacktrace --continue \
               spotlessCheck \
               assemble bundle \
-              android-app:lintDebug testDebug
+              android-app:lintDebug testDebug \
               phoneGroupDebugAndroidTest
 
       - name: Upload build outputs
