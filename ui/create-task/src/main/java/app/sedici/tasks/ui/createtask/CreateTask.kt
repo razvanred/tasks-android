@@ -34,6 +34,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -42,6 +44,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -67,6 +70,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.flowWithLifecycle
 import app.sedici.tasks.common.compose.ConfirmDiscardChangesDialog
 import app.sedici.tasks.ui.createtask.internal.CreateTaskViewModel
+import app.sedici.tasks.ui.createtask.internal.SnackbarError
 import app.sedici.tasks.ui.createtask.internal.UiAction
 import app.sedici.tasks.ui.createtask.internal.UiDestination
 import app.sedici.tasks.ui.createtask.internal.UiState
@@ -107,6 +111,24 @@ internal fun CreateTask(
         pendingUiDestinationFlow.flowWithLifecycle(lifecycle)
     }
 
+    val pendingSnackbarErrorFlow = viewModel.pendingSnackbarError
+    val pendingSnackbarErrorFlowLifecycleAware = remember(pendingSnackbarErrorFlow, lifecycle) {
+        pendingSnackbarErrorFlow.flowWithLifecycle(lifecycle)
+    }
+
+    val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(scaffoldState.snackbarHostState) {
+        pendingSnackbarErrorFlowLifecycleAware.collect { error ->
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = when (error) {
+                    SnackbarError.ErrorWhileSaving -> "error while saving"
+                },
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
     LaunchedEffect(lifecycle) {
         pendingUiDestinationFlowLifecycleAware.collect { destination ->
             when (destination) {
@@ -119,7 +141,8 @@ internal fun CreateTask(
 
     CreateTask(
         uiState = uiState,
-        actioner = actioner
+        actioner = actioner,
+        scaffoldState = scaffoldState,
     )
 }
 
@@ -127,6 +150,7 @@ internal fun CreateTask(
 internal fun CreateTask(
     uiState: UiState,
     actioner: (UiAction) -> Unit,
+    scaffoldState: ScaffoldState,
 ) {
     val context = LocalContext.current as FragmentActivity
 
@@ -147,6 +171,7 @@ internal fun CreateTask(
     }
 
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             CreateTaskAppBar(
                 navigateUp = { actioner(UiAction.NavigateUp) },
@@ -381,14 +406,5 @@ private fun CreateTaskAppBarPreview() {
     CreateTaskAppBar(
         navigateUp = {},
         saveTask = {},
-    )
-}
-
-@Preview
-@Composable
-private fun CreateTaskPreview() {
-    CreateTask(
-        uiState = UiState.Empty,
-        actioner = {}
     )
 }

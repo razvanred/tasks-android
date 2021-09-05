@@ -49,13 +49,15 @@ android {
 
 dependencies {
     implementation(projects.base.android)
-    implementation(projects.data.local.android.common) // TODO remove
 
     implementation(projects.common.compose)
     implementation(projects.common.resources)
 
     implementation(projects.ui.tasks)
     implementation(projects.ui.createTask)
+
+    implementation(projects.data.repository)
+    implementation(projects.domain)
 
     implementation(libs.androidx.coreKtx)
     implementation(libs.androidx.appcompat)
@@ -73,7 +75,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigationCompose)
     kapt(libs.dagger.hilt.compiler)
 
-    debugImplementation(projects.data.local.android.inmemory) // TODO remove
+    debugImplementation(projects.data.local.android.ondevice) // TODO remove
     releaseImplementation(projects.data.local.android.ondevice) // TODO remove
 
     implementation(libs.kotlinx.coroutines.android)

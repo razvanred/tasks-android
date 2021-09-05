@@ -26,10 +26,8 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.android.tools.desugar)
 
-    implementation(projects.data.local.common)
+    implementation(projects.data.repository)
     implementation(projects.base.android)
-
-    implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.compiler)

@@ -24,7 +24,7 @@ android {
 }
 
 dependencies {
-    implementation(projects.data.local.android.common)
+    api(projects.data.local.android.common)
 
     kapt(libs.androidx.room.compiler)
 

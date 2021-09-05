@@ -39,5 +39,9 @@ dependencies {
     api(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
 
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
+
     api(projects.data.local.common)
+    implementation(projects.base.android)
 }

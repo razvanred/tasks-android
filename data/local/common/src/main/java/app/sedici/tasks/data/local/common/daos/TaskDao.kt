@@ -23,7 +23,7 @@ import androidx.room.OnConflictStrategy.IGNORE
 import app.sedici.tasks.data.local.common.model.TaskEntity
 
 @Dao
-interface TasksDao {
+interface TaskDao {
     @Insert(onConflict = IGNORE)
     suspend fun insert(task: TaskEntity)
 

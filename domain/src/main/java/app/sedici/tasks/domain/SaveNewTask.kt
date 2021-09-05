@@ -16,28 +16,21 @@
 
 package app.sedici.tasks.domain
 
-import app.sedici.tasks.data.local.common.daos.TasksDao
-import app.sedici.tasks.data.local.common.model.TaskEntity
+import app.sedici.tasks.base.common.AppCoroutineDispatchers
+import app.sedici.tasks.data.repository.TaskRepository
 import app.sedici.tasks.model.NewTask
-import java.time.OffsetDateTime
-import java.time.ZoneId
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SaveNewTask @Inject constructor(
-    private val tasksDao: TasksDao,
+    private val taskRepository: TaskRepository,
+    private val dispatchers: AppCoroutineDispatchers,
 ) : Interactor<SaveNewTask.Params>() {
 
     override suspend fun doWork(params: Params) {
-        tasksDao.insert(
-            TaskEntity(
-                title = params.newTask.title,
-                description = params.newTask.description,
-                isChecked = false,
-                createdAt = OffsetDateTime.now(),
-                updatedAt = OffsetDateTime.now(),
-                expiresOn = params.newTask.expiresOn?.atStartOfDay(ZoneId.systemDefault())?.toOffsetDateTime(),
-            )
-        )
+        withContext(dispatchers.io) {
+            taskRepository.saveNewTask(params.newTask)
+        }
     }
 
     operator fun invoke(newTask: NewTask) = invoke(Params(newTask))

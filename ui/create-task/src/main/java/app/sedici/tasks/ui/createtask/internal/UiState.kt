@@ -27,6 +27,7 @@ data class UiState(
     val expiresOn: LocalDate?,
     val showExpirationDatePicker: Boolean,
     val showConfirmDiscardChangesDialog: Boolean,
+    val loading: Boolean,
 ) {
     val shouldShowConfirmDiscardChangesDialog: Boolean
         get() = title != Empty.title ||
@@ -40,6 +41,7 @@ data class UiState(
             expiresOn = null,
             showExpirationDatePicker = false,
             showConfirmDiscardChangesDialog = false,
+            loading = false,
         )
     }
 }
