@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.model
+package app.sedici.tasks.data.repository
 
-@JvmInline
-value class TaskId(val value: String)
+import app.sedici.tasks.data.local.common.model.TaskEntityId
+import app.sedici.tasks.model.TaskId
+
+internal fun TaskEntityId.toTaskId() = TaskId(value = value)
+
+internal fun TaskId.toTaskEntityId() = TaskEntityId(value = value)

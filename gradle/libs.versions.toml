@@ -7,6 +7,7 @@ dagger = "2.38.1"
 androidxhilt = "1.0.0"
 androidxlifecycle = "2.4.0-alpha03"
 kotlinxcoroutines = "1.5.1"
+mockk = "1.12.0"
 
 [libraries]
 android-gp = "com.android.tools.build:gradle:7.1.0-alpha10"
@@ -61,8 +62,12 @@ truth = "com.google.truth:truth:1.1.3"
 
 junit4 = "junit:junit:4.13.2"
 
+robolectric = "org.robolectric:robolectric:4.6.1"
+
 androidx-test-core = "androidx.test:core:1.3.0"
 androidx-test-runner = "androidx.test:runner:1.1.0"
 androidx-test-rules = "androidx.test:rules:1.1.0"
 androidx-test-ext-junit = "androidx.test.ext:junit:1.1.2"
 androidx-test-ext-truth = "androidx.test.ext:truth:1.0.0"
+
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }

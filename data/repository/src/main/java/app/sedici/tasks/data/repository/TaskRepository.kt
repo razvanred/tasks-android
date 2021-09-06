@@ -19,30 +19,33 @@ package app.sedici.tasks.data.repository
 import app.sedici.tasks.data.local.common.daos.TaskDao
 import app.sedici.tasks.data.local.common.model.TaskEntity
 import app.sedici.tasks.model.NewTask
+import app.sedici.tasks.model.TaskId
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import javax.inject.Inject
 
 interface TaskRepository {
-    suspend fun saveNewTask(newTask: NewTask)
+    suspend fun saveNewTask(newTask: NewTask): TaskId
 }
 
 class DefaultTaskRepository @Inject constructor(
     private val taskDao: TaskDao
 ) : TaskRepository {
 
-    override suspend fun saveNewTask(newTask: NewTask) {
-        taskDao.insert(
-            TaskEntity(
-                title = newTask.title,
-                description = newTask.description,
-                isChecked = false,
-                createdAt = OffsetDateTime.now(),
-                updatedAt = OffsetDateTime.now(),
-                expiresOn = newTask.expiresOn
-                    ?.atStartOfDay(ZoneId.systemDefault())
-                    ?.toOffsetDateTime(),
-            )
+    override suspend fun saveNewTask(newTask: NewTask): TaskId {
+        val entity = TaskEntity(
+            title = newTask.title,
+            description = newTask.description,
+            isChecked = false,
+            createdAt = OffsetDateTime.now(),
+            updatedAt = OffsetDateTime.now(),
+            expiresOn = newTask.expiresOn
+                ?.atStartOfDay(ZoneId.systemDefault())
+                ?.toOffsetDateTime(),
         )
+
+        taskDao.insert(entity)
+
+        return entity.id.toTaskId()
     }
 }

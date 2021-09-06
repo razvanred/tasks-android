@@ -168,4 +168,31 @@ class TaskDaoTest {
 
         assertThat(taskDao.getAll()).containsExactly(task3, task2)
     }
+
+    @Test
+    fun getByIdOrNull_getExistent_checkReturnsNotNull() = runBlocking {
+        val task1 = createTaskEntity(
+            title = "Resume my college career",
+            description = "I want to do this",
+        )
+        val task2 = createTaskEntity(title = "Update Sedici Tasks dependencies")
+
+        taskDao.insert(listOf(task1, task2))
+
+        assertThat(taskDao.getByIdOrNull(task1.id))
+            .isEqualTo(task1)
+    }
+
+    @Test
+    fun getByIdOrNull_getNonExistent_checkReturnsNull() = runBlocking {
+        val task1 = createTaskEntity(
+            title = "Dentist appointment"
+        )
+        val task2 = createTaskEntity(title = "Lunch with Luca")
+
+        taskDao.insert(task1)
+
+        assertThat(taskDao.getByIdOrNull(task2.id))
+            .isNull()
+    }
 }

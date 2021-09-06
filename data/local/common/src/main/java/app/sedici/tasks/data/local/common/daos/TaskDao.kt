@@ -23,6 +23,8 @@ import androidx.room.OnConflictStrategy.IGNORE
 import androidx.room.Query
 import androidx.room.Update
 import app.sedici.tasks.data.local.common.model.TaskEntity
+import app.sedici.tasks.data.local.common.model.TaskEntityId
+import org.intellij.lang.annotations.Language
 import app.sedici.tasks.data.local.common.model.TaskEntity.Companion.TableName as Tasks
 
 @Dao
@@ -41,4 +43,15 @@ interface TaskDao {
 
     @Query("SELECT * FROM $Tasks")
     suspend fun getAll(): List<TaskEntity>
+
+    @Query(QUERY_GET_BY_ID)
+    suspend fun getByIdOrNull(id: TaskEntityId): TaskEntity?
+
+    companion object {
+        @Language("RoomSql")
+        private const val QUERY_GET_BY_ID = """
+            SELECT * FROM $Tasks
+            WHERE id = :id
+        """
+    }
 }
