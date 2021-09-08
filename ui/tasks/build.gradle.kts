@@ -32,7 +32,7 @@ android {
 dependencies {
     implementation(projects.common.compose)
     implementation(projects.common.resources)
-    implementation(projects.model) // TODO remove when creating :domain module
+    implementation(projects.domain)
 
     implementation(libs.compose.foundation.foundation)
     implementation(libs.compose.foundation.layout)

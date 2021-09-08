@@ -2,8 +2,7 @@ import app.sedici.tasks.buildsrc.Android
 
 plugins {
     id("com.android.library")
-    kotlin("android")
-    kotlin("kapt")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -11,33 +10,36 @@ android {
 
     defaultConfig {
         minSdk = Android.minSdk
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-            }
-        }
     }
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    packagingOptions {
+        resources.excludes.addAll(
+            listOf(
+                "META-INF/AL2.0",
+                "META-INF/LGPL2.1",
+            )
+        )
+    }
 }
 
 dependencies {
     coreLibraryDesugaring(libs.android.tools.desugar)
 
-    implementation(libs.androidx.room.ktx)
-    api(libs.androidx.room.runtime)
-    kapt(libs.androidx.room.compiler)
+    api(projects.base.android)
+    api(projects.base.common.test)
 
-    api(projects.data.local.common)
+    api(libs.dagger.hilt.android.testing)
+
+    api(libs.kotlinx.coroutines.test)
+
+    implementation(libs.androidx.test.runner)
 }

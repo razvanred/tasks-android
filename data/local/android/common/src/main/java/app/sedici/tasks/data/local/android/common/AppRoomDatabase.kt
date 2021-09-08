@@ -21,10 +21,12 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import app.sedici.tasks.data.local.common.AppDatabase
 import app.sedici.tasks.data.local.common.model.AccountEntity
+import app.sedici.tasks.data.local.common.model.TaskEntity
 
 @Database(
     entities = [
         AccountEntity::class,
+        TaskEntity::class, // TODO remove after implementing multiple account management
     ],
     version = 1,
     exportSchema = true,

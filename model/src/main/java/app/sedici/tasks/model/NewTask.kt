@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.data.local.common.daos
+package app.sedici.tasks.model
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy.IGNORE
-import app.sedici.tasks.data.local.common.model.TaskEntity
+import java.time.LocalDate
 
-@Dao
-interface TasksDao {
-    @Insert(onConflict = IGNORE)
-    suspend fun insert(task: TaskEntity)
-
-    @Insert(onConflict = IGNORE)
-    suspend fun insert(tasks: List<TaskEntity>)
-
-    @Delete
-    suspend fun delete(task: TaskEntity)
-}
+data class NewTask(
+    val title: String,
+    val description: String,
+    val expiresOn: LocalDate?,
+)

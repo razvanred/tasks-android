@@ -16,4 +16,10 @@
 
 package app.sedici.tasks.data.local.common.model
 
-data class TaskEntityId(val value: Long)
+import java.util.UUID
+
+data class TaskEntityId(val value: String) {
+    companion object {
+        fun create() = TaskEntityId(value = UUID.randomUUID().toString())
+    }
+}

@@ -6,4 +6,5 @@
     <string name="create_task_expires_on_title_date_picker">Seleziona una data di scadenza</string>
     <string name="create_task_expires_on_field_title">Data di scadenza</string>
     <string name="create_task_expires_on_field_no_value_label">Nessuna data di scadenza</string>
+    <string name="create_task_error_while_saving_message">Si è verificato un errore durante il salvataggio</string>
 </resources>

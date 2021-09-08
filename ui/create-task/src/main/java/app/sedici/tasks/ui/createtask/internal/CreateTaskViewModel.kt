@@ -18,20 +18,30 @@ package app.sedici.tasks.ui.createtask.internal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.sedici.tasks.base.android.ui.ObservableLoadingCounter
+import app.sedici.tasks.base.common.InvokeError
+import app.sedici.tasks.base.common.InvokeStarted
+import app.sedici.tasks.base.common.InvokeStatus
+import app.sedici.tasks.base.common.InvokeSuccess
+import app.sedici.tasks.base.common.extensions.combine
+import app.sedici.tasks.domain.SaveNewTask
+import app.sedici.tasks.model.NewTask
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class CreateTaskViewModel @Inject constructor() : ViewModel() {
+internal class CreateTaskViewModel @Inject constructor(
+    private val saveNewTask: SaveNewTask,
+) : ViewModel() {
 
     private val title = MutableStateFlow(UiState.Empty.title)
     private val description = MutableStateFlow(UiState.Empty.description)
@@ -41,19 +51,23 @@ internal class CreateTaskViewModel @Inject constructor() : ViewModel() {
         UiState.Empty.showConfirmDiscardChangesDialog
     )
 
+    private val loadingState = ObservableLoadingCounter()
+
     val uiState = combine(
         title,
         description,
         expiresOn,
         showExpirationDatePicker,
         showConfirmDiscardChangesDialog,
-    ) { title, description, expiresOn, showExpirationDatePicker, showConfirmDiscardChangesDialog ->
+        loadingState.observable,
+    ) { title, description, expiresOn, showExpirationDatePicker, showConfirmDiscardChangesDialog, loading ->
         UiState(
             title = title,
             description = description,
             expiresOn = expiresOn,
             showExpirationDatePicker = showExpirationDatePicker,
-            showConfirmDiscardChangesDialog = showConfirmDiscardChangesDialog
+            showConfirmDiscardChangesDialog = showConfirmDiscardChangesDialog,
+            loading = loading,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -66,11 +80,22 @@ internal class CreateTaskViewModel @Inject constructor() : ViewModel() {
     private val _pendingUiDestination = MutableSharedFlow<UiDestination>()
     val pendingUiDestination = _pendingUiDestination.asSharedFlow()
 
+    private val _pendingSnackbarError = MutableSharedFlow<SnackbarError>()
+    val pendingSnackbarError = _pendingSnackbarError.asSharedFlow()
+
     init {
         viewModelScope.launch {
             pendingUiAction.collect { uiAction ->
                 when (uiAction) {
-                    is UiAction.SaveTask -> TODO()
+                    is UiAction.SaveTask -> {
+                        val uiState = uiState.first()
+                        val newTask = NewTask(
+                            title = uiState.title.text,
+                            description = uiState.description.text,
+                            expiresOn = uiState.expiresOn,
+                        )
+                        saveNewTask(newTask).watchStatus()
+                    }
                     is UiAction.EditTitle -> title.emit(uiAction.newValue)
                     is UiAction.EditDescription -> description.emit(uiAction.newValue)
                     is UiAction.SetExpirationDate -> expiresOn.emit(uiAction.newValue)
@@ -97,6 +122,22 @@ internal class CreateTaskViewModel @Inject constructor() : ViewModel() {
                         _pendingUiDestination.emit(UiDestination.Up)
                     }
                 }
+            }
+        }
+    }
+
+    private fun Flow<InvokeStatus>.watchStatus() = viewModelScope.launch { collectStatus() }
+
+    private suspend fun Flow<InvokeStatus>.collectStatus() = collect { status ->
+        when (status) {
+            InvokeStarted -> loadingState.addLoader()
+            InvokeSuccess -> {
+                loadingState.removeLoader()
+                _pendingUiDestination.emit(UiDestination.Up)
+            }
+            is InvokeError -> {
+                loadingState.removeLoader()
+                _pendingSnackbarError.emit(SnackbarError.ErrorWhileSaving)
             }
         }
     }

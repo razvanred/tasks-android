@@ -27,7 +27,7 @@ import java.time.OffsetDateTime
 )
 data class TaskEntity(
     @PrimaryKey
-    val id: TaskEntityId,
+    val id: TaskEntityId = TaskEntityId.create(),
     val title: String,
     val description: String,
     @ColumnInfo(name = "is_checked")
