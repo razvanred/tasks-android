@@ -10,4 +10,6 @@ java {
 
 dependencies {
     api(libs.androidx.room.common)
+
+    implementation(libs.kotlinx.coroutines.core)
 }

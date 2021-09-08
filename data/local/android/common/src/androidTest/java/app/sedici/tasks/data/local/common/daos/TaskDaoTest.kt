@@ -18,6 +18,7 @@ package app.sedici.tasks.data.local.common.daos
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import app.sedici.tasks.data.local.common.createTaskEntity
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -31,10 +32,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import javax.inject.Inject
+import kotlin.time.ExperimentalTime
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalTime::class)
 class TaskDaoTest {
 
     @get:Rule
@@ -204,6 +206,32 @@ class TaskDaoTest {
 
         assertThat(taskDao.getByIdOrNull(task2.id))
             .isNull()
+    }
+
+    @Test
+    fun observeAll_insertAndDeleteElements_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(
+            title = "Walk on the moon"
+        )
+        val task2 = createTaskEntity(
+            title = "Surfing",
+            description = "California Beach"
+        )
+
+        taskDao.observeAll().test {
+            assertThat(awaitItem()).isEmpty()
+
+            taskDao.insert(task1)
+            assertThat(awaitItem()).containsExactly(task1)
+
+            taskDao.insert(task2)
+            assertThat(awaitItem()).containsExactly(task1, task2)
+
+            taskDao.delete(task1)
+            assertThat(awaitItem()).containsExactly(task2)
+
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @After

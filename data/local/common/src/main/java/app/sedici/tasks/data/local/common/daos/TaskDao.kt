@@ -22,8 +22,10 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy.IGNORE
 import androidx.room.Query
 import androidx.room.Update
+import app.sedici.tasks.data.local.common.daos.TaskDao.Companion.QUERY_GET_ALL
 import app.sedici.tasks.data.local.common.model.TaskEntity
 import app.sedici.tasks.data.local.common.model.TaskEntityId
+import kotlinx.coroutines.flow.Flow
 import org.intellij.lang.annotations.Language
 import app.sedici.tasks.data.local.common.model.TaskEntity.Companion.TableName as Tasks
 
@@ -41,17 +43,33 @@ interface TaskDao {
     @Update
     suspend fun update(task: TaskEntity)
 
-    @Query("SELECT * FROM $Tasks")
+    @Query(QUERY_GET_ALL)
     suspend fun getAll(): List<TaskEntity>
 
     @Query(QUERY_GET_BY_ID)
     suspend fun getByIdOrNull(id: TaskEntityId): TaskEntity?
+
+    @Query(QUERY_GET_ALL)
+    fun observeAll(): Flow<List<TaskEntity>>
 
     companion object {
         @Language("RoomSql")
         private const val QUERY_GET_BY_ID = """
             SELECT * FROM $Tasks
             WHERE id = :id
+        """
+
+        @Language("RoomSql")
+        private const val QUERY_GET_ALL = """
+            SELECT * FROM $Tasks
+            ORDER BY 
+                expires_on DESC,
+                created_at DESC,
+                updated_at DESC,
+                title,
+                description,
+                is_checked,
+                id
         """
     }
 }
