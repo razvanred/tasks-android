@@ -71,3 +71,7 @@ androidx-test-ext-junit = "androidx.test.ext:junit:1.1.2"
 androidx-test-ext-truth = "androidx.test.ext:truth:1.0.0"
 
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
+turbine = "app.cash.turbine:turbine:0.6.1"
+
+androidx-arch-core-testing = "androidx.arch.core:core-testing:2.1.0"

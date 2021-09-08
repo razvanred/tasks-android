@@ -55,6 +55,11 @@ android {
 			}
 		}
 	}
+
+	packagingOptions {
+		exclude "META-INF/AL2.0"
+		exclude "META-INF/LGPL2.1"
+	}
 }
 
 dependencies {
@@ -83,5 +88,6 @@ dependencies {
 
 	androidTestImplementation(projects.base.android.test)
 
-	androidTestImplementation(projects.data.local.android.inmemory)
+	androidTestImplementation(projects.data.local.android.testing)
+	androidTestImplementation(libs.androidx.arch.core.testing)
 }

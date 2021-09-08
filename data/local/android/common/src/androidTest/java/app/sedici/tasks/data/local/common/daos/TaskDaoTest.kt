@@ -16,12 +16,16 @@
 
 package app.sedici.tasks.data.local.common.daos
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.sedici.tasks.data.local.common.createTaskEntity
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,13 +34,19 @@ import javax.inject.Inject
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
+@OptIn(ExperimentalCoroutinesApi::class)
 class TaskDaoTest {
 
     @get:Rule
     var hiltRule = HiltAndroidRule(this)
 
+    @get:Rule
+    var instantExecutorRule = InstantTaskExecutorRule()
+
     @Inject
     lateinit var taskDao: TaskDao
+
+    private val testScope = TestCoroutineScope()
 
     @Before
     fun setup() {
@@ -44,7 +54,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun insertNew_checkSuccess() = runBlocking<Unit> {
+    fun insertNew_checkSuccess() = testScope.runBlockingTest {
         val task = createTaskEntity(
             title = "Sample Title",
             description = "This is a simple description"
@@ -56,7 +66,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun insertMultipleNew_checkSuccess() = runBlocking<Unit> {
+    fun insertMultipleNew_checkSuccess() = testScope.runBlockingTest {
         val tasks = listOf(
             createTaskEntity(title = "Task 1"),
             createTaskEntity(title = "Task 2"),
@@ -68,7 +78,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun insertMultipleNew_someWithSameId_checkNothingHappens() = runBlocking<Unit> {
+    fun insertMultipleNew_someWithSameId_checkNothingHappens() = testScope.runBlockingTest {
         val task1 = createTaskEntity(title = "Task 1")
         val task2 = createTaskEntity(title = "Task 2")
         val task3 = createTaskEntity(title = "Task 3", id = task1.id)
@@ -81,7 +91,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun insertAlreadyExistent_checkNothingHappens() = runBlocking<Unit> {
+    fun insertAlreadyExistent_checkNothingHappens() = testScope.runBlockingTest {
         val task = createTaskEntity(
             title = "Sample Title",
             description = "This is a simple description"
@@ -94,7 +104,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun deleteExistent_checkSuccess() = runBlocking<Unit> {
+    fun deleteExistent_checkSuccess() = testScope.runBlockingTest {
         val task1 = createTaskEntity(
             title = "Hello world!",
             description = "Print it with C++",
@@ -113,7 +123,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun deleteNonExistent_checkNothingHappens() = runBlocking<Unit> {
+    fun deleteNonExistent_checkNothingHappens() = testScope.runBlockingTest {
         val task1 = createTaskEntity(
             title = "Hello world!",
             description = "Print it with C++"
@@ -132,7 +142,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun updateExistent_checkSuccess() = runBlocking<Unit> {
+    fun updateExistent_checkSuccess() = testScope.runBlockingTest {
         val task1 = createTaskEntity(
             title = "Hello world!",
             description = "Print it with C++"
@@ -151,7 +161,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun updateNonExistent_checkNothingHappens() = runBlocking<Unit> {
+    fun updateNonExistent_checkNothingHappens() = testScope.runBlockingTest {
         val task1 = createTaskEntity(
             title = "Hello world!",
             description = "Print it with C++"
@@ -170,7 +180,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun getByIdOrNull_getExistent_checkReturnsNotNull() = runBlocking {
+    fun getByIdOrNull_getExistent_checkReturnsNotNull() = testScope.runBlockingTest {
         val task1 = createTaskEntity(
             title = "Resume my college career",
             description = "I want to do this",
@@ -184,7 +194,7 @@ class TaskDaoTest {
     }
 
     @Test
-    fun getByIdOrNull_getNonExistent_checkReturnsNull() = runBlocking {
+    fun getByIdOrNull_getNonExistent_checkReturnsNull() = testScope.runBlockingTest {
         val task1 = createTaskEntity(
             title = "Dentist appointment"
         )
@@ -194,5 +204,10 @@ class TaskDaoTest {
 
         assertThat(taskDao.getByIdOrNull(task2.id))
             .isNull()
+    }
+
+    @After
+    fun cleanup() {
+        testScope.cleanupTestCoroutines()
     }
 }

@@ -46,10 +46,13 @@ dependencies {
     testImplementation(libs.dagger.hilt.android.testing)
     kaptTest(libs.dagger.hilt.compiler)
 
-    testImplementation(projects.data.local.android.inmemory)
+    testImplementation(projects.data.local.android.testing)
+    testImplementation(projects.base.common.test)
 
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.test.rules)
     testImplementation(libs.androidx.test.runner)
+
+    testImplementation(libs.androidx.arch.core.testing)
 }

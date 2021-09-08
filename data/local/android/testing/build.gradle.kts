@@ -2,7 +2,9 @@ import app.sedici.tasks.buildsrc.Android
 
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    kotlin("android")
+    kotlin("kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -13,7 +15,6 @@ android {
     }
 
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -23,14 +24,10 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring(libs.android.tools.desugar)
+    api(projects.data.local.android.common)
 
-    api(projects.base.android)
-    api(projects.base.common.test)
+    kapt(libs.androidx.room.compiler)
 
-    api(libs.dagger.hilt.android.testing)
-
-    api(libs.kotlinx.coroutines.test)
-
-    implementation(libs.androidx.test.runner)
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
 }
