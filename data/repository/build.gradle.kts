@@ -42,6 +42,7 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.truth)
     testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
 
     testImplementation(libs.dagger.hilt.android.testing)
     kaptTest(libs.dagger.hilt.compiler)

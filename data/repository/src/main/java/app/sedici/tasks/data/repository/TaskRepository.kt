@@ -19,15 +19,22 @@ package app.sedici.tasks.data.repository
 import app.sedici.tasks.data.local.common.daos.TaskDao
 import app.sedici.tasks.data.local.common.model.TaskEntity
 import app.sedici.tasks.model.NewTask
+import app.sedici.tasks.model.Task
 import app.sedici.tasks.model.TaskId
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import javax.inject.Inject
 
 interface TaskRepository {
     suspend fun saveNewTask(newTask: NewTask): TaskId
+
+    fun observeTasks(): Flow<List<Task>>
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DefaultTaskRepository @Inject constructor(
     private val taskDao: TaskDao
 ) : TaskRepository {
@@ -48,4 +55,11 @@ class DefaultTaskRepository @Inject constructor(
 
         return entity.id.toTaskId()
     }
+
+    override fun observeTasks(): Flow<List<Task>> =
+        taskDao.observeAll().map { entities ->
+            entities.map { entity ->
+                entity.toTask()
+            }
+        }
 }

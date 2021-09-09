@@ -19,7 +19,7 @@ package app.sedici.tasks.data.local.common.daos
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
-import app.sedici.tasks.data.local.common.createTaskEntity
+import app.sedici.tasks.data.local.common.testing.createTaskEntity
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -40,10 +40,10 @@ import kotlin.time.ExperimentalTime
 class TaskDaoTest {
 
     @get:Rule
-    var hiltRule = HiltAndroidRule(this)
+    val hiltRule by lazy { HiltAndroidRule(this) }
 
     @get:Rule
-    var instantExecutorRule = InstantTaskExecutorRule()
+    val instantExecutorRule = InstantTaskExecutorRule()
 
     @Inject
     lateinit var taskDao: TaskDao

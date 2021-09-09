@@ -16,9 +16,21 @@
 
 package app.sedici.tasks.data.repository
 
+import app.sedici.tasks.data.local.common.model.TaskEntity
 import app.sedici.tasks.data.local.common.model.TaskEntityId
+import app.sedici.tasks.model.Task
 import app.sedici.tasks.model.TaskId
 
 internal fun TaskEntityId.toTaskId() = TaskId(value = value)
 
 internal fun TaskId.toTaskEntityId() = TaskEntityId(value = value)
+
+internal fun TaskEntity.toTask() = Task(
+    id = id.toTaskId(),
+    title = title,
+    description = description,
+    isChecked = isChecked,
+    createdAt = createdAt.toLocalDateTime(),
+    updatedAt = updatedAt.toLocalDateTime(),
+    expiresOn = expiresOn?.toLocalDate(),
+)

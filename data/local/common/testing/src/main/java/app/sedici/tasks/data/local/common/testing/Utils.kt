@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.data.local.common
+package app.sedici.tasks.data.local.common.testing
 
 import app.sedici.tasks.data.local.common.model.TaskEntity
 import app.sedici.tasks.data.local.common.model.TaskEntityId
