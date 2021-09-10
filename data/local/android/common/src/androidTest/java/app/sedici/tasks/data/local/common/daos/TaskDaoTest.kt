@@ -234,6 +234,31 @@ class TaskDaoTest {
         }
     }
 
+    @Test
+    fun deleteExistentById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Watch JoJo Season 6")
+        val task2 = createTaskEntity(title = "Explore the nature")
+
+        taskDao.insert(listOf(task1, task2))
+
+        taskDao.deleteById(task1.id)
+
+        assertThat(taskDao.getAll()).containsExactly(task2)
+    }
+
+    @Test
+    fun deleteNonExistentById_checkNothingHappens() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Watch Interstellar")
+        val task2 = createTaskEntity(title = "Solve the hardest math equation")
+        val task3 = createTaskEntity(title = "Visit your parents")
+
+        taskDao.insert(listOf(task1, task2))
+
+        taskDao.deleteById(task3.id)
+
+        assertThat(taskDao.getAll()).containsExactly(task1, task2)
+    }
+
     @After
     fun cleanup() {
         testScope.cleanupTestCoroutines()

@@ -31,6 +31,10 @@ import javax.inject.Inject
 interface TaskRepository {
     suspend fun saveNewTask(newTask: NewTask): TaskId
 
+    suspend fun deleteTask(id: TaskId)
+
+    suspend fun deleteTask(task: Task)
+
     fun observeTasks(): Flow<List<Task>>
 }
 
@@ -62,4 +66,12 @@ class DefaultTaskRepository @Inject constructor(
                 entity.toTask()
             }
         }
+
+    override suspend fun deleteTask(id: TaskId) {
+        taskDao.deleteById(id = id.toTaskEntityId())
+    }
+
+    override suspend fun deleteTask(task: Task) {
+        deleteTask(task.id)
+    }
 }

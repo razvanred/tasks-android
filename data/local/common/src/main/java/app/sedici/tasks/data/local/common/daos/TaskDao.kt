@@ -52,6 +52,9 @@ interface TaskDao {
     @Query(QUERY_GET_ALL)
     fun observeAll(): Flow<List<TaskEntity>>
 
+    @Query("DELETE FROM $Tasks WHERE id = :id")
+    suspend fun deleteById(id: TaskEntityId)
+
     companion object {
         @Language("RoomSql")
         private const val QUERY_GET_BY_ID = """

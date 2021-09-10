@@ -138,6 +138,56 @@ class DefaultTaskRepositoryTest {
         }
     }
 
+    @Test
+    fun deleteById_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Wake up at 8.00AM")
+        val taskEntity2 = createTaskEntity(title = "Doctor appointment at 11.00AM")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.deleteTask(id = taskEntity1.id.toTaskId())
+
+        assertThat(taskDao.getAll()).containsExactly(taskEntity2)
+    }
+
+    @Test
+    fun delete_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Vaccine at 5.00PM")
+        val taskEntity2 = createTaskEntity(title = "Buy cat food")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.deleteTask(task = taskEntity1.toTask())
+
+        assertThat(taskDao.getAll()).containsExactly(taskEntity2)
+    }
+
+    @Test
+    fun deleteNonExistentById_checkNothingHappens() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Write bugs")
+        val taskEntity2 = createTaskEntity(title = "Deliver buggy product")
+        val taskEntity3 = createTaskEntity(title = "Write unit tests")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.deleteTask(id = taskEntity3.id.toTaskId())
+
+        assertThat(taskDao.getAll()).containsExactly(taskEntity1, taskEntity2)
+    }
+
+    @Test
+    fun deleteNonExistent_checkNothingHappens() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Go to the mall")
+        val taskEntity2 = createTaskEntity(title = "Invest in tech stocks")
+        val taskEntity3 = createTaskEntity(title = "Share wedding photos")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.deleteTask(task = taskEntity3.toTask())
+
+        assertThat(taskDao.getAll()).containsExactly(taskEntity1, taskEntity2)
+    }
+
     @After
     fun cleanup() {
         testScope.cleanupTestCoroutines()
