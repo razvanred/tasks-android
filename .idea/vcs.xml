@@ -3,7 +3,7 @@
   <component name="GithubSharedProjectSettings">
     <option name="branchProtectionPatterns">
       <list>
-        <option value="main" />
+        <option value="trunk" />
       </list>
     </option>
   </component>

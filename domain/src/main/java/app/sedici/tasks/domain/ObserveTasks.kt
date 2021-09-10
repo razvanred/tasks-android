@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.data.repository
+package app.sedici.tasks.domain
 
-import app.sedici.tasks.data.local.common.model.TaskEntity
-import app.sedici.tasks.data.local.common.model.TaskEntityId
+import app.sedici.tasks.data.repository.TaskRepository
 import app.sedici.tasks.model.Task
-import app.sedici.tasks.model.TaskId
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-internal fun TaskEntityId.toTaskId() = TaskId(value = value)
+class ObserveTasks @Inject constructor(
+    private val taskRepository: TaskRepository,
+) : SubjectInteractor<ObserveTasks.Params, List<Task>>() {
 
-internal fun TaskId.toTaskEntityId() = TaskEntityId(value = value)
+    override fun createObservable(params: Params): Flow<List<Task>> =
+        taskRepository.observeTasks()
 
-internal fun TaskEntity.toTask() = Task(
-    id = id.toTaskId(),
-    title = title,
-    description = description,
-    isChecked = isChecked,
-    createdAt = createdAt.toLocalDateTime(),
-    updatedAt = updatedAt.toLocalDateTime(),
-    expiresOn = expiresOn?.toLocalDate(),
-)
+    operator fun invoke() = invoke(Params)
+
+    object Params
+}

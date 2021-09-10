@@ -18,19 +18,23 @@ package app.sedici.tasks.data.repository
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import app.sedici.tasks.base.common.test.coAssertThrows
 import app.sedici.tasks.data.local.common.daos.TaskDao
+import app.sedici.tasks.data.local.common.testing.createTaskEntity
 import app.sedici.tasks.model.NewTask
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,18 +43,19 @@ import org.robolectric.annotation.Config
 import java.io.IOException
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.time.ExperimentalTime
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 @Config(application = HiltTestApplication::class)
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalTime::class)
 class DefaultTaskRepositoryTest {
 
     @get:Rule
-    var hiltRule = HiltAndroidRule(this)
+    val hiltRule by lazy { HiltAndroidRule(this) }
 
     @get:Rule
-    var instantExecutorRule = InstantTaskExecutorRule()
+    val instantExecutorRule = InstantTaskExecutorRule()
 
     private val testScope = TestCoroutineScope()
 
@@ -94,6 +99,93 @@ class DefaultTaskRepositoryTest {
         coAssertThrows(IOException::class.java) {
             taskRepository.saveNewTask(newTask)
         }
+    }
+
+    @Test
+    fun observeAll_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(
+            title = "Play football"
+        )
+        val taskEntity2 = createTaskEntity(
+            title = "Send letter to Santa"
+        )
+        val task1 = taskEntity1.toTask()
+        val task2 = taskEntity2.toTask()
+
+        taskRepository.observeTasks().test {
+            taskDao.insert(taskEntity1)
+            taskDao.insert(taskEntity2)
+            taskDao.delete(taskEntity2)
+
+            assertThat(awaitItem()).isEmpty()
+            assertThat(awaitItem()).containsExactly(task1)
+            assertThat(awaitItem()).containsExactly(task1, task2)
+            assertThat(awaitItem()).containsExactly(task1)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun observeAll_withFailingTaskDao_checkFailure() = testScope.runBlockingTest {
+        val taskDao: TaskDao = mockk()
+        val taskRepository = DefaultTaskRepository(taskDao = taskDao)
+
+        every { taskDao.observeAll() }.throws(RuntimeException("Stub!"))
+
+        assertThrows(RuntimeException::class.java) {
+            taskRepository.observeTasks()
+        }
+    }
+
+    @Test
+    fun deleteById_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Wake up at 8.00AM")
+        val taskEntity2 = createTaskEntity(title = "Doctor appointment at 11.00AM")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.deleteTask(id = taskEntity1.id.toTaskId())
+
+        assertThat(taskDao.getAll()).containsExactly(taskEntity2)
+    }
+
+    @Test
+    fun delete_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Vaccine at 5.00PM")
+        val taskEntity2 = createTaskEntity(title = "Buy cat food")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.deleteTask(task = taskEntity1.toTask())
+
+        assertThat(taskDao.getAll()).containsExactly(taskEntity2)
+    }
+
+    @Test
+    fun deleteNonExistentById_checkNothingHappens() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Write bugs")
+        val taskEntity2 = createTaskEntity(title = "Deliver buggy product")
+        val taskEntity3 = createTaskEntity(title = "Write unit tests")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.deleteTask(id = taskEntity3.id.toTaskId())
+
+        assertThat(taskDao.getAll()).containsExactly(taskEntity1, taskEntity2)
+    }
+
+    @Test
+    fun deleteNonExistent_checkNothingHappens() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Go to the mall")
+        val taskEntity2 = createTaskEntity(title = "Invest in tech stocks")
+        val taskEntity3 = createTaskEntity(title = "Share wedding photos")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.deleteTask(task = taskEntity3.toTask())
+
+        assertThat(taskDao.getAll()).containsExactly(taskEntity1, taskEntity2)
     }
 
     @After
