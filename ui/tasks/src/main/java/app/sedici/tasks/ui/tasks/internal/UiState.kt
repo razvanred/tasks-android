@@ -14,33 +14,19 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.createtask.internal
+package app.sedici.tasks.ui.tasks.internal
 
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.text.input.TextFieldValue
-import java.time.LocalDate
+import app.sedici.tasks.model.Task
 
 @Stable
 internal data class UiState(
-    val title: TextFieldValue,
-    val description: TextFieldValue,
-    val expiresOn: LocalDate?,
-    val showExpirationDatePicker: Boolean,
-    val showConfirmDiscardChangesDialog: Boolean,
+    val tasks: List<Task>,
     val loading: Boolean,
 ) {
-    val shouldShowConfirmDiscardChangesDialog: Boolean
-        get() = title != Empty.title ||
-            description != Empty.description ||
-            expiresOn != Empty.expiresOn
-
     companion object {
         val Empty = UiState(
-            title = TextFieldValue(text = ""),
-            description = TextFieldValue(text = ""),
-            expiresOn = null,
-            showExpirationDatePicker = false,
-            showConfirmDiscardChangesDialog = false,
+            tasks = emptyList(),
             loading = false,
         )
     }

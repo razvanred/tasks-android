@@ -34,7 +34,7 @@ dependencies {
     coreLibraryDesugaring(libs.android.tools.desugar)
 
     implementation(projects.data.repository)
-    implementation(projects.base.android)
+    api(projects.base.android)
 
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.compiler)

@@ -18,15 +18,71 @@ package app.sedici.tasks.ui.tasks.internal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.sedici.tasks.base.android.ui.ObservableLoadingCounter
+import app.sedici.tasks.base.common.InvokeError
+import app.sedici.tasks.base.common.InvokeStarted
+import app.sedici.tasks.base.common.InvokeStatus
+import app.sedici.tasks.base.common.InvokeSuccess
+import app.sedici.tasks.domain.ObserveTasks
+import app.sedici.tasks.domain.SetTaskIsCheckedById
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class TasksViewModel @Inject constructor() : ViewModel() {
+internal class TasksViewModel @Inject constructor(
+    observeTasks: ObserveTasks,
+    setTaskIsCheckedById: SetTaskIsCheckedById,
+) : ViewModel() {
 
     private val pendingActions = MutableSharedFlow<UiAction>()
+
+    private val loadingState = ObservableLoadingCounter()
+
+    val uiState = combine(
+        observeTasks.flow,
+        loadingState.observable
+    ) { tasks, loading ->
+        UiState(tasks = tasks, loading = loading)
+    }
+
+    init {
+        viewModelScope.launch {
+            pendingActions.collect { uiAction ->
+                when (uiAction) {
+                    is UiAction.EditTaskIsChecked -> {
+                        setTaskIsCheckedById(
+                            id = uiAction.taskId,
+                            isChecked = uiAction.checked
+                        ).watchStatus()
+                    }
+                }
+            }
+        }
+
+        observeTasks()
+    }
+
+    private fun Flow<InvokeStatus>.watchStatus() = viewModelScope.launch { collectStatus() }
+
+    private suspend fun Flow<InvokeStatus>.collectStatus() = collect { status ->
+        when (status) {
+            InvokeStarted -> {
+                loadingState.addLoader()
+            }
+            InvokeSuccess -> {
+                loadingState.removeLoader()
+            }
+            is InvokeError -> {
+                loadingState.removeLoader()
+                // TODO show snackbar error
+            }
+        }
+    }
 
     fun submitUiAction(uiAction: UiAction) {
         viewModelScope.launch {
