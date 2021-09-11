@@ -35,6 +35,10 @@ interface TaskRepository {
 
     suspend fun deleteTask(task: Task)
 
+    suspend fun setTaskIsCheckedById(id: TaskId, isChecked: Boolean)
+
+    suspend fun getByIdOrNull(id: TaskId): Task?
+
     fun observeTasks(): Flow<List<Task>>
 }
 
@@ -74,4 +78,14 @@ class DefaultTaskRepository @Inject constructor(
     override suspend fun deleteTask(task: Task) {
         deleteTask(task.id)
     }
+
+    override suspend fun setTaskIsCheckedById(id: TaskId, isChecked: Boolean) {
+        taskDao.setIsCheckedById(
+            isChecked = isChecked,
+            id = id.toTaskEntityId()
+        )
+    }
+
+    override suspend fun getByIdOrNull(id: TaskId): Task? =
+        taskDao.getByIdOrNull(id = id.toTaskEntityId())?.toTask()
 }

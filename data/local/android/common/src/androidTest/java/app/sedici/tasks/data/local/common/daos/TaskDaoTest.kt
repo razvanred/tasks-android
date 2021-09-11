@@ -17,7 +17,6 @@
 package app.sedici.tasks.data.local.common.daos
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import app.sedici.tasks.data.local.common.testing.createTaskEntity
 import com.google.common.truth.Truth.assertThat
@@ -30,11 +29,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 
-@RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalTime::class)
 class TaskDaoTest {
