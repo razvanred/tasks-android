@@ -71,9 +71,14 @@ internal class TasksViewModel @Inject constructor(
 
     private suspend fun Flow<InvokeStatus>.collectStatus() = collect { status ->
         when (status) {
-            InvokeStarted -> {}
-            InvokeSuccess -> {}
+            InvokeStarted -> {
+                loadingState.addLoader()
+            }
+            InvokeSuccess -> {
+                loadingState.removeLoader()
+            }
             is InvokeError -> {
+                loadingState.removeLoader()
                 // TODO show snackbar error
             }
         }

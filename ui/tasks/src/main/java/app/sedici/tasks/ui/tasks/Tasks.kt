@@ -18,6 +18,7 @@ package app.sedici.tasks.ui.tasks
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -92,10 +94,15 @@ internal fun Tasks(
 ) {
     Scaffold(
         topBar = {
-            TasksAppBar()
+            Column(modifier = Modifier.fillMaxWidth()) {
+                TasksAppBar()
+                if (uiState.loading) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+            }
         },
         modifier = Modifier.fillMaxSize(),
-        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 text = {
@@ -114,7 +121,9 @@ internal fun Tasks(
         },
         content = { contentPadding ->
             Tasks(
-                modifier = Modifier.fillMaxSize().padding(contentPadding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
                 tasks = uiState.tasks,
                 actioner = actioner,
             )
@@ -128,7 +137,10 @@ internal fun Tasks(
     tasks: List<Task>,
     actioner: (UiAction) -> Unit,
 ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(bottom = 128.dp)
+    ) {
         items(tasks) { task ->
             Task(
                 modifier = Modifier.fillMaxWidth(),
@@ -137,7 +149,7 @@ internal fun Tasks(
                     actioner(
                         UiAction.EditTaskIsChecked(
                             taskId = task.id,
-                            checked = !task.isChecked
+                            checked = checked
                         )
                     )
                 }
