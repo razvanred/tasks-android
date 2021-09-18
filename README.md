@@ -1,9 +1,9 @@
-# Sedici Tasks ✅
+# Tasks for Android
 
 [![CI](https://github.com/razvnred/SediciTasks-Android/actions/workflows/build.yml/badge.svg)](https://github.com/razvnred/SediciTasks-Android/actions/workflows/build.yml)
 [![ktlint](https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg)](https://ktlint.github.io/)
 
-Keep track of your daily activities and todos with Sedici Tasks!
+Keep track of your daily activities and todos with Tasks!
 
 ## License
 
