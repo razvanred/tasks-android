@@ -18,4 +18,6 @@ package app.sedici.tasks.ui.taskdetails
 
 sealed interface TaskDetailsSnackbarError {
     object ErrorWhileDeleting : TaskDetailsSnackbarError
+
+    object UnknownError : TaskDetailsSnackbarError
 }

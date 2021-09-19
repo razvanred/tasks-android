@@ -17,15 +17,29 @@
 package app.sedici.tasks.ui.taskdetails
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarDuration
@@ -35,18 +49,26 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.flowWithLifecycle
+import app.sedici.tasks.common.compose.TaskBottomBar
+import app.sedici.tasks.model.Task
 import kotlinx.coroutines.flow.collect
+import java.time.LocalDate
 
 @Composable
 fun TaskDetails(
@@ -82,6 +104,7 @@ internal fun TaskDetails(
 
     val errorWhileDeletingMessage =
         stringResource(R.string.task_details_error_while_deleting_message)
+    val unknownErrorMessage = stringResource(R.string.task_details_unknown_error_message)
 
     val scaffoldState = rememberScaffoldState()
 
@@ -90,6 +113,7 @@ internal fun TaskDetails(
             scaffoldState.snackbarHostState.showSnackbar(
                 message = when (error) {
                     TaskDetailsSnackbarError.ErrorWhileDeleting -> errorWhileDeletingMessage
+                    TaskDetailsSnackbarError.UnknownError -> unknownErrorMessage
                 },
                 duration = SnackbarDuration.Short
             )
@@ -152,10 +176,171 @@ internal fun TaskDetails(
                     .fillMaxSize()
                     .padding(contentPadding)
             ) {
-                Text("Hello ${stringResource(R.string.task_details_screen_title)}!")
+                val task = uiState.task
+
+                if (task != null) {
+                    TaskDetailsContent(
+                        task = task,
+                        actioner = actioner,
+                    )
+                }
+            }
+        },
+        bottomBar = {
+            val task = uiState.task
+
+            if (task != null) {
+                TaskDetailsBottomBar(
+                    checked = task.isChecked,
+                    onCheckedChange = { checked ->
+                        actioner(
+                            TaskDetailsAction.EditTaskIsChecked(checked = checked)
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     )
+}
+
+@Composable
+private fun TaskDetailsContent(
+    modifier: Modifier = Modifier,
+    task: Task,
+    actioner: (TaskDetailsAction) -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        item {
+            Text(
+                text = task.title,
+                style = MaterialTheme.typography.h5,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
+
+        item {
+            Column {
+                TaskDescriptionItem(
+                    modifier = Modifier
+                        .clickable(onClick = {})
+                        .fillMaxWidth(),
+                    description = task.description,
+                )
+                Divider()
+                TaskExpirationDateItem(
+                    modifier = Modifier
+                        .clickable(onClick = {})
+                        .fillMaxWidth(),
+                    expiresOn = task.expiresOn
+                )
+                Divider()
+            }
+        }
+
+        item {
+            Spacer(Modifier)
+        }
+    }
+}
+
+@Composable
+private fun TaskDescriptionItem(
+    modifier: Modifier = Modifier,
+    description: String
+) {
+    TaskDetailsItem(
+        modifier = modifier,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Notes,
+                contentDescription = null
+            )
+        },
+        text = {
+            Text(
+                text = description.ifBlank {
+                    stringResource(R.string.task_details_no_description_provided_message)
+                }
+            )
+        },
+        contentAlpha = if (description.isBlank()) {
+            ContentAlpha.medium
+        } else {
+            ContentAlpha.high
+        }
+    )
+}
+
+@Composable
+private fun TaskExpirationDateItem(
+    modifier: Modifier = Modifier,
+    expiresOn: LocalDate?,
+) {
+    TaskDetailsItem(
+        modifier = modifier,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Event,
+                contentDescription = null
+            )
+        },
+        text = {
+            Text(
+                text = expiresOn?.toString()
+                    ?: stringResource(R.string.task_details_no_expiration_date_provided_message)
+            )
+        },
+        contentAlpha = if (expiresOn == null) {
+            ContentAlpha.medium
+        } else {
+            ContentAlpha.high
+        }
+    )
+}
+
+@Composable
+private fun TaskDetailsItem(
+    modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null,
+    text: @Composable () -> Unit,
+    contentAlpha: Float,
+) {
+    Row(
+        modifier = modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        if (icon != null) {
+            Row(
+                modifier = Modifier.size(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CompositionLocalProvider(
+                    LocalContentAlpha provides contentAlpha,
+                    content = icon
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ProvideTextStyle(value = MaterialTheme.typography.body1) {
+                CompositionLocalProvider(
+                    LocalContentAlpha provides contentAlpha,
+                    content = text
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -215,5 +400,54 @@ private fun DeleteTaskConfirmDialog(
                 Text(text = stringResource(R.string.task_details_delete_task_confirm_dialog_delete_button))
             }
         }
+    )
+}
+
+@Composable
+private fun TaskDetailsBottomBar(
+    modifier: Modifier = Modifier,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    TaskBottomBar(modifier = modifier) {
+        if (checked) {
+            MarkAsNotCompletedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { onCheckedChange(false) }
+            )
+        } else {
+            MarkAsCompletedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { onCheckedChange(true) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun MarkAsCompletedButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Button(
+        modifier = modifier,
+        content = {
+            Text(text = stringResource(R.string.task_details_mark_task_as_completed_button))
+        },
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun MarkAsNotCompletedButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    OutlinedButton(
+        modifier = modifier,
+        content = {
+            Text(text = stringResource(R.string.task_details_mark_task_as_not_completed_button))
+        },
+        onClick = onClick
     )
 }

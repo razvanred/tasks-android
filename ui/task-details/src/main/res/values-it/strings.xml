@@ -6,4 +6,9 @@
     <string name="task_details_delete_task_confirm_dialog_cancel_button">@android:string/cancel</string>
     <string name="task_details_delete_task_confirm_dialog_delete_button">Elimina</string>
     <string name="task_details_error_while_deleting_message">Si è verificato un errore durante l\'eliminazione dell\'attività</string>
+    <string name="task_details_no_description_provided_message">Nessuna descrizione fornita</string>
+    <string name="task_details_no_expiration_date_provided_message">Nessuna data di scadenza fornita</string>
+    <string name="task_details_mark_task_as_not_completed_button">Segna come non completata</string>
+    <string name="task_details_mark_task_as_completed_button">Segna come completata</string>
+    <string name="task_details_unknown_error_message">Errore sconosciuto</string>
 </resources>

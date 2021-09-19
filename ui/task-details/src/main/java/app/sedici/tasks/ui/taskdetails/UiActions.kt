@@ -27,4 +27,6 @@ sealed interface TaskDetailsAction {
     object EditTask : TaskDetailsAction
 
     object NavigateUp : TaskDetailsAction
+
+    data class EditTaskIsChecked(val checked: Boolean) : TaskDetailsAction
 }

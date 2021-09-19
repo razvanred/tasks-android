@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.compose.material.material)
     implementation(libs.compose.animation.animation)
     implementation(libs.compose.ui.tooling)
+    implementation(libs.compose.material.iconsext)
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.dagger.hilt.android)

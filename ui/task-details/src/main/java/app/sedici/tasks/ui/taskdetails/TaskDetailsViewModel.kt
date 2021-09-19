@@ -25,6 +25,7 @@ import app.sedici.tasks.base.common.InvokeStarted
 import app.sedici.tasks.base.common.InvokeSuccess
 import app.sedici.tasks.domain.DeleteTaskById
 import app.sedici.tasks.domain.ObserveTaskById
+import app.sedici.tasks.domain.SetTaskIsCheckedById
 import app.sedici.tasks.model.TaskId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -40,6 +41,7 @@ class TaskDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     observeTaskById: ObserveTaskById,
     private val deleteTaskById: DeleteTaskById,
+    private val setTaskIsCheckedById: SetTaskIsCheckedById,
 ) : ViewModel() {
     private val taskId = TaskId(value = savedStateHandle.get<String>("taskId")!!)
 
@@ -84,6 +86,23 @@ class TaskDetailsViewModel @Inject constructor(
             TaskDetailsAction.EditTask -> TODO("navigate to edit task screen")
             TaskDetailsAction.NavigateUp -> {
                 _pendingUiDestination.emit(TaskDetailsDestination.Up)
+            }
+            is TaskDetailsAction.EditTaskIsChecked -> {
+                setTaskIsCheckedById(id = taskId, isChecked = uiAction.checked).collect { status ->
+                    when (status) {
+                        InvokeStarted -> loadingState.addLoader()
+                        InvokeSuccess -> {
+                            loadingState.removeLoader()
+                            if (uiAction.checked) {
+                                _pendingUiDestination.emit(TaskDetailsDestination.Up)
+                            }
+                        }
+                        is InvokeError -> {
+                            loadingState.removeLoader()
+                            _pendingSnackbarError.emit(TaskDetailsSnackbarError.UnknownError)
+                        }
+                    }
+                }
             }
         }
     }
