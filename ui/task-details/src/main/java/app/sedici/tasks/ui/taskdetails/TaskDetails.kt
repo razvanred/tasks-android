@@ -19,12 +19,18 @@ package app.sedici.tasks.ui.taskdetails
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -40,10 +46,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.flowWithLifecycle
-import app.sedici.tasks.ui.taskdetails.internal.TaskDetailsViewModel
-import app.sedici.tasks.ui.taskdetails.internal.UiAction
-import app.sedici.tasks.ui.taskdetails.internal.UiDestination
-import app.sedici.tasks.ui.taskdetails.internal.UiState
 import kotlinx.coroutines.flow.collect
 
 @Composable
@@ -66,11 +68,32 @@ internal fun TaskDetails(
     val uiStateFlowLifecycleAware = remember(uiStateFlow, lifecycle) {
         uiStateFlow.flowWithLifecycle(lifecycle)
     }
-    val uiState by uiStateFlowLifecycleAware.collectAsState(initial = UiState.Empty)
+    val uiState by uiStateFlowLifecycleAware.collectAsState(initial = TaskDetailsUiState.Empty)
 
     val pendingUiDestinationFlow = viewModel.pendingUiDestination
     val pendingUiDestinationFlowLifecycleAware = remember(pendingUiDestinationFlow, lifecycle) {
         pendingUiDestinationFlow.flowWithLifecycle(lifecycle)
+    }
+
+    val pendingSnackbarErrorFlow = viewModel.pendingSnackbarError
+    val pendingSnackbarErrorFlowLifecycleAware = remember(pendingSnackbarErrorFlow, lifecycle) {
+        pendingSnackbarErrorFlow.flowWithLifecycle(lifecycle)
+    }
+
+    val errorWhileDeletingMessage =
+        stringResource(R.string.task_details_error_while_deleting_message)
+
+    val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(scaffoldState.snackbarHostState) {
+        pendingSnackbarErrorFlowLifecycleAware.collect { error ->
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = when (error) {
+                    TaskDetailsSnackbarError.ErrorWhileDeleting -> errorWhileDeletingMessage
+                },
+                duration = SnackbarDuration.Short
+            )
+        }
     }
 
     val actioner = viewModel::submitUiAction
@@ -78,35 +101,49 @@ internal fun TaskDetails(
     LaunchedEffect(lifecycle) {
         pendingUiDestinationFlowLifecycleAware.collect { destination ->
             when (destination) {
-                UiDestination.Up -> onBack()
+                TaskDetailsDestination.Up -> onBack()
             }
         }
     }
 
-    BackHandler(onBack = { actioner(UiAction.NavigateUp) })
+    BackHandler(onBack = { actioner(TaskDetailsAction.NavigateUp) })
 
     TaskDetails(
         uiState = uiState,
         actioner = actioner,
-        scaffoldState = rememberScaffoldState(),
+        scaffoldState = scaffoldState,
     )
 }
 
 @Composable
 internal fun TaskDetails(
-    uiState: UiState,
-    actioner: (UiAction) -> Unit,
+    uiState: TaskDetailsUiState,
+    actioner: (TaskDetailsAction) -> Unit,
     scaffoldState: ScaffoldState,
 ) {
+    if (uiState.showDeleteTaskConfirmDialog) {
+        DeleteTaskConfirmDialog(
+            onDismissClick = {
+                actioner(TaskDetailsAction.AnswerConfirmDeleteTask.Cancel)
+            },
+            onDeleteClick = {
+                actioner(TaskDetailsAction.AnswerConfirmDeleteTask.Delete)
+            }
+        )
+    }
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
             TaskDetailsAppBar(
-                navigateUp = { actioner(UiAction.NavigateUp) },
+                navigateUp = { actioner(TaskDetailsAction.NavigateUp) },
                 deleteTask = {
-                    actioner(UiAction.DeleteTask)
+                    actioner(TaskDetailsAction.DeleteTask)
                 }
             )
+            if (uiState.loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
         },
         modifier = Modifier.fillMaxSize(),
         content = { contentPadding ->
@@ -151,6 +188,32 @@ private fun TaskDetailsAppBar(
                 },
                 onClick = deleteTask
             )
+        }
+    )
+}
+
+@Composable
+private fun DeleteTaskConfirmDialog(
+    onDeleteClick: () -> Unit,
+    onDismissClick: () -> Unit,
+) {
+    AlertDialog(
+        title = {
+            Text(text = stringResource(R.string.task_details_delete_task_confirm_dialog_title))
+        },
+        text = {
+            Text(text = stringResource(R.string.task_details_delete_task_confirm_dialog_message))
+        },
+        onDismissRequest = onDismissClick,
+        dismissButton = {
+            TextButton(onClick = onDismissClick) {
+                Text(text = stringResource(R.string.task_details_delete_task_confirm_dialog_cancel_button))
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDeleteClick) {
+                Text(text = stringResource(R.string.task_details_delete_task_confirm_dialog_delete_button))
+            }
         }
     )
 }

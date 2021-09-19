@@ -42,7 +42,7 @@ private sealed class LeafScreen(private val route: String) {
 
     object TaskDetails : LeafScreen("task/{taskId}") {
         fun createRoute(root: Screen, taskId: TaskId): String =
-            "${root.route}/task/$taskId"
+            "${root.route}/task/${taskId.value}"
     }
 }
 
@@ -112,7 +112,7 @@ private fun NavGraphBuilder.addTaskDetails(
         )
     ) {
         TaskDetails(
-            onBack = navController::navigateUp
+            onBack = navController::navigateUp,
         )
     }
 }

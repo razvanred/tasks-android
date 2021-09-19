@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="task_details_screen_title">Detalii activitate</string>
+    <string name="task_details_delete_task_confirm_dialog_title">Eliminați activitatea?</string>
+    <string name="task_details_delete_task_confirm_dialog_message">Activitatea va fi ștearsă de pe dispozitiv</string>
+    <string name="task_details_delete_task_confirm_dialog_cancel_button">@android:string/cancel</string>
+    <string name="task_details_delete_task_confirm_dialog_delete_button">Șterge</string>
+    <string name="task_details_error_while_deleting_message">S-a verificat o eroare la ștergerea activități</string>
 </resources>

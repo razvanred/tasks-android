@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.taskdetails.internal
+package app.sedici.tasks.ui.taskdetails
 
-import androidx.compose.runtime.Stable
-import app.sedici.tasks.model.Task
+sealed interface TaskDetailsAction {
+    object DeleteTask : TaskDetailsAction
 
-@Stable
-internal data class UiState(
-    val task: Task?,
-    val loading: Boolean,
-    val showDeleteTaskConfirmDialog: Boolean,
-) {
-    companion object {
-        val Empty = UiState(
-            task = null,
-            loading = false,
-            showDeleteTaskConfirmDialog = false,
-        )
+    sealed interface AnswerConfirmDeleteTask : TaskDetailsAction {
+        object Delete : AnswerConfirmDeleteTask
+        object Cancel : AnswerConfirmDeleteTask
     }
+
+    object EditTask : TaskDetailsAction
+
+    object NavigateUp : TaskDetailsAction
 }

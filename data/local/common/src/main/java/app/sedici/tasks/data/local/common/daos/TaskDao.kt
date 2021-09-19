@@ -57,6 +57,9 @@ interface TaskDao {
     @Query("UPDATE $Tasks SET is_checked = :isChecked WHERE id = :id")
     suspend fun setIsCheckedById(id: TaskEntityId, isChecked: Boolean)
 
+    @Query(QUERY_GET_BY_ID)
+    fun observeById(id: TaskEntityId): Flow<TaskEntity?>
+
     companion object {
         @Language("RoomSql")
         private const val QUERY_GET_BY_ID = """

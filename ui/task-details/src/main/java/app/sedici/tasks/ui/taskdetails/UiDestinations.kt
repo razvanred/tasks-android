@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.taskdetails.internal
+package app.sedici.tasks.ui.taskdetails
 
-internal sealed interface UiAction {
-    object DeleteTask : UiAction
-
-    sealed interface AnswerConfirmDeleteTask {
-        object Delete : AnswerConfirmDeleteTask
-        object Cancel : AnswerConfirmDeleteTask
-    }
-
-    object EditTask : UiAction
-
-    object NavigateUp : UiAction
+sealed interface TaskDetailsDestination {
+    object Up : TaskDetailsDestination
 }

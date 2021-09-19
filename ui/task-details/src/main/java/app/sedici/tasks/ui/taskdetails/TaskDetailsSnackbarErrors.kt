@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.taskdetails.internal
+package app.sedici.tasks.ui.taskdetails
 
-internal sealed interface UiDestination {
-    object Up : UiDestination
+sealed interface TaskDetailsSnackbarError {
+    object ErrorWhileDeleting : TaskDetailsSnackbarError
 }

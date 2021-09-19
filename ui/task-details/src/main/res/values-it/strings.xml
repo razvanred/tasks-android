@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="task_details_screen_title">Dettagli attività</string>
+    <string name="task_details_delete_task_confirm_dialog_title">Eliminare attività?</string>
+    <string name="task_details_delete_task_confirm_dialog_message">L\'attività sarà eliminata dal dispositivo</string>
+    <string name="task_details_delete_task_confirm_dialog_cancel_button">@android:string/cancel</string>
+    <string name="task_details_delete_task_confirm_dialog_delete_button">Elimina</string>
+    <string name="task_details_error_while_deleting_message">Si è verificato un errore durante l\'eliminazione dell\'attività</string>
 </resources>

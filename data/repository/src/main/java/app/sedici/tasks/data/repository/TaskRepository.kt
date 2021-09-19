@@ -40,6 +40,8 @@ interface TaskRepository {
     suspend fun getByIdOrNull(id: TaskId): Task?
 
     fun observeTasks(): Flow<List<Task>>
+
+    fun observeTaskById(id: TaskId): Flow<Task?>
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -88,4 +90,7 @@ class DefaultTaskRepository @Inject constructor(
 
     override suspend fun getByIdOrNull(id: TaskId): Task? =
         taskDao.getByIdOrNull(id = id.toTaskEntityId())?.toTask()
+
+    override fun observeTaskById(id: TaskId): Flow<Task?> =
+        taskDao.observeById(id = id.toTaskEntityId()).map { entity -> entity?.toTask() }
 }

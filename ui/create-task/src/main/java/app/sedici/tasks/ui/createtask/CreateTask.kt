@@ -118,11 +118,13 @@ internal fun CreateTask(
 
     val scaffoldState = rememberScaffoldState()
 
+    val errorWhileSavingMessage = stringResource(R.string.create_task_error_while_saving_message)
+
     LaunchedEffect(scaffoldState.snackbarHostState) {
         pendingSnackbarErrorFlowLifecycleAware.collect { error ->
             scaffoldState.snackbarHostState.showSnackbar(
                 message = when (error) {
-                    SnackbarError.ErrorWhileSaving -> "error while saving"
+                    SnackbarError.ErrorWhileSaving -> errorWhileSavingMessage
                 },
                 duration = SnackbarDuration.Short
             )
