@@ -5,4 +5,5 @@
     <string name="cd_save">Save</string>
     <string name="cd_clear">Clear</string>
     <string name="cd_select_date">Select date</string>
+    <string name="cd_delete">Delete</string>
 </resources>

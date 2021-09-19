@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.tasks.internal
-
-import app.sedici.tasks.model.TaskId
+package app.sedici.tasks.ui.taskdetails.internal
 
 internal sealed interface UiAction {
-    data class EditTaskIsChecked(val taskId: TaskId, val checked: Boolean) : UiAction
+    object DeleteTask : UiAction
 
-    data class ShowTaskDetails(val taskId: TaskId) : UiAction
+    sealed interface AnswerConfirmDeleteTask {
+        object Delete : AnswerConfirmDeleteTask
+        object Cancel : AnswerConfirmDeleteTask
+    }
+
+    object EditTask : UiAction
+
+    object NavigateUp : UiAction
 }

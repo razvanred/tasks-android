@@ -63,6 +63,7 @@ dependencies {
 
     implementation(projects.ui.tasks)
     implementation(projects.ui.createTask)
+    implementation(projects.ui.taskDetails)
 
     implementation(projects.data.repository)
     implementation(projects.domain)

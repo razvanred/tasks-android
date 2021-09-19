@@ -16,6 +16,7 @@
 
 package app.sedici.tasks.ui.tasks
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,6 +39,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -50,24 +52,30 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.flowWithLifecycle
 import app.sedici.tasks.model.Task
+import app.sedici.tasks.model.TaskId
 import app.sedici.tasks.ui.tasks.internal.TasksViewModel
 import app.sedici.tasks.ui.tasks.internal.UiAction
+import app.sedici.tasks.ui.tasks.internal.UiDestination
 import app.sedici.tasks.ui.tasks.internal.UiState
+import kotlinx.coroutines.flow.collect
 
 @Composable
 fun Tasks(
     openCreateTask: () -> Unit,
+    openTaskDetails: (TaskId) -> Unit,
 ) {
     Tasks(
         viewModel = hiltViewModel(),
         openCreateTask = openCreateTask,
+        openTaskDetails = openTaskDetails,
     )
 }
 
 @Composable
 internal fun Tasks(
     viewModel: TasksViewModel,
-    openCreateTask: () -> Unit
+    openCreateTask: () -> Unit,
+    openTaskDetails: (TaskId) -> Unit,
 ) {
     val uiStateFlow = viewModel.uiState
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -77,7 +85,20 @@ internal fun Tasks(
 
     val uiState by uiStateFlowLifecycleAware.collectAsState(initial = UiState.Empty)
 
+    val pendingUiDestinationFlow = viewModel.pendingUiDestination
+    val pendingUiDestinationFlowLifecycleAware = remember(pendingUiDestinationFlow, lifecycle) {
+        pendingUiDestinationFlow.flowWithLifecycle(lifecycle)
+    }
+
     val actioner = viewModel::submitUiAction
+
+    LaunchedEffect(lifecycle) {
+        pendingUiDestinationFlowLifecycleAware.collect { destination ->
+            when (destination) {
+                is UiDestination.TaskDetails -> openTaskDetails(destination.taskId)
+            }
+        }
+    }
 
     Tasks(
         uiState = uiState,
@@ -143,7 +164,13 @@ internal fun Tasks(
     ) {
         items(tasks) { task ->
             Task(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .clickable(
+                        onClick = {
+                            actioner(UiAction.ShowTaskDetails(taskId = task.id))
+                        }
+                    )
+                    .fillMaxWidth(),
                 task = task,
                 onCheckedChange = { checked ->
                     actioner(

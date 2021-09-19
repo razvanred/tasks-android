@@ -5,4 +5,5 @@
     <string name="cd_save">Salvați</string>
     <string name="cd_clear">Ștergeți</string>
     <string name="cd_select_date">Selectați dată</string>
+    <string name="cd_delete">Ștergeți</string>
 </resources>
