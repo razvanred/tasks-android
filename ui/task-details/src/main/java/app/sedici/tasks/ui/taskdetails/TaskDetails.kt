@@ -54,20 +54,17 @@ import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.flowWithLifecycle
 import app.sedici.tasks.common.compose.TaskBottomBar
+import app.sedici.tasks.common.compose.collectInLaunchedEffect
+import app.sedici.tasks.common.compose.rememberFlowWithLifecycle
 import app.sedici.tasks.model.Task
-import kotlinx.coroutines.flow.collect
 import java.time.LocalDate
 
 @Composable
@@ -85,22 +82,11 @@ internal fun TaskDetails(
     onBack: () -> Unit,
     viewModel: TaskDetailsViewModel,
 ) {
-    val uiStateFlow = viewModel.uiState
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val uiStateFlowLifecycleAware = remember(uiStateFlow, lifecycle) {
-        uiStateFlow.flowWithLifecycle(lifecycle)
-    }
-    val uiState by uiStateFlowLifecycleAware.collectAsState(initial = TaskDetailsUiState.Empty)
+    val uiState by rememberFlowWithLifecycle(flow = viewModel.uiState)
+        .collectAsState(initial = TaskDetailsUiState.Empty)
 
-    val pendingUiDestinationFlow = viewModel.pendingUiDestination
-    val pendingUiDestinationFlowLifecycleAware = remember(pendingUiDestinationFlow, lifecycle) {
-        pendingUiDestinationFlow.flowWithLifecycle(lifecycle)
-    }
-
-    val pendingSnackbarErrorFlow = viewModel.pendingSnackbarError
-    val pendingSnackbarErrorFlowLifecycleAware = remember(pendingSnackbarErrorFlow, lifecycle) {
-        pendingSnackbarErrorFlow.flowWithLifecycle(lifecycle)
-    }
+    val pendingUiDestinationFlow = rememberFlowWithLifecycle(flow = viewModel.pendingUiDestination)
+    val pendingSnackbarErrorFlow = rememberFlowWithLifecycle(flow = viewModel.pendingSnackbarError)
 
     val errorWhileDeletingMessage =
         stringResource(R.string.task_details_error_while_deleting_message)
@@ -108,25 +94,28 @@ internal fun TaskDetails(
 
     val scaffoldState = rememberScaffoldState()
 
-    LaunchedEffect(scaffoldState.snackbarHostState) {
-        pendingSnackbarErrorFlowLifecycleAware.collect { error ->
-            scaffoldState.snackbarHostState.showSnackbar(
-                message = when (error) {
-                    TaskDetailsSnackbarError.ErrorWhileDeleting -> errorWhileDeletingMessage
-                    TaskDetailsSnackbarError.UnknownError -> unknownErrorMessage
-                },
-                duration = SnackbarDuration.Short
-            )
+    pendingSnackbarErrorFlow.collectInLaunchedEffect { error ->
+        when (error) {
+            TaskDetailsSnackbarError.UnknownError -> {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = unknownErrorMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
+            TaskDetailsSnackbarError.ErrorWhileDeleting -> {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = errorWhileDeletingMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
 
     val actioner = viewModel::submitUiAction
 
-    LaunchedEffect(lifecycle) {
-        pendingUiDestinationFlowLifecycleAware.collect { destination ->
-            when (destination) {
-                TaskDetailsDestination.Up -> onBack()
-            }
+    pendingUiDestinationFlow.collectInLaunchedEffect { destination ->
+        when (destination) {
+            TaskDetailsDestination.Up -> onBack()
         }
     }
 

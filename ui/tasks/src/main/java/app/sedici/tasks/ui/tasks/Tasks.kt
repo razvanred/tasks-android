@@ -39,7 +39,6 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -48,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.sedici.tasks.common.compose.collectInLaunchedEffect
 import app.sedici.tasks.common.compose.rememberFlowWithLifecycle
 import app.sedici.tasks.model.Task
 import app.sedici.tasks.model.TaskId
@@ -55,7 +55,6 @@ import app.sedici.tasks.ui.tasks.internal.TasksViewModel
 import app.sedici.tasks.ui.tasks.internal.UiAction
 import app.sedici.tasks.ui.tasks.internal.UiDestination
 import app.sedici.tasks.ui.tasks.internal.UiState
-import kotlinx.coroutines.flow.collect
 
 @Composable
 fun Tasks(
@@ -78,18 +77,13 @@ internal fun Tasks(
     val uiState by rememberFlowWithLifecycle(flow = viewModel.uiState)
         .collectAsState(initial = UiState.Empty)
 
-    val pendingUiDestinationFlow = viewModel.pendingUiDestination
-    val pendingUiDestinationFlowLifecycleAware = remember(pendingUiDestinationFlow, lifecycle) {
-        pendingUiDestinationFlow.flowWithLifecycle(lifecycle)
-    }
+    val pendingUiDestinationFlow = rememberFlowWithLifecycle(flow = viewModel.pendingUiDestination)
 
     val actioner = viewModel::submitUiAction
 
-    LaunchedEffect(lifecycle) {
-        pendingUiDestinationFlowLifecycleAware.collect { destination ->
-            when (destination) {
-                is UiDestination.TaskDetails -> openTaskDetails(destination.taskId)
-            }
+    pendingUiDestinationFlow.collectInLaunchedEffect { destination ->
+        when (destination) {
+            is UiDestination.TaskDetails -> openTaskDetails(destination.taskId)
         }
     }
 
