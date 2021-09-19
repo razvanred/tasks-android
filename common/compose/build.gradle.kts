@@ -34,4 +34,6 @@ dependencies {
     implementation(libs.compose.foundation.layout)
     implementation(libs.compose.animation.animation)
     implementation(libs.compose.ui.tooling)
+
+    api(libs.androidx.lifecycle.runtime.ktx)
 }
