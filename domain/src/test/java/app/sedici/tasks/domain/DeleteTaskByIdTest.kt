@@ -51,13 +51,13 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class, ExperimentalCoroutinesApi::class)
 class DeleteTaskByIdTest {
 
-    private val appDispatchers = AppCoroutineDispatchers(
+    private val dispatchers = AppCoroutineDispatchers(
         main = TestCoroutineDispatcher(),
         io = TestCoroutineDispatcher(),
         computation = TestCoroutineDispatcher()
     )
 
-    private val testScope = TestCoroutineScope(context = appDispatchers.main)
+    private val testScope = TestCoroutineScope(context = dispatchers.main)
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
@@ -78,7 +78,7 @@ class DeleteTaskByIdTest {
     @Test
     fun invoke_checkSuccess() = testScope.runBlockingTest {
         val deleteTaskById = DeleteTaskById(
-            appDispatchers = appDispatchers,
+            dispatchers = dispatchers,
             taskRepository = taskRepository
         )
         val newTask1 = NewTask(
@@ -110,7 +110,7 @@ class DeleteTaskByIdTest {
     @Test
     fun invoke_nonExistentId_checkNothingHappens() = testScope.runBlockingTest {
         val deleteTaskById = DeleteTaskById(
-            appDispatchers = appDispatchers,
+            dispatchers = dispatchers,
             taskRepository = taskRepository
         )
         val newTask1 = NewTask(
@@ -146,7 +146,7 @@ class DeleteTaskByIdTest {
         val taskRepository: TaskRepository = mockk()
         val deleteTaskById = DeleteTaskById(
             taskRepository = taskRepository,
-            appDispatchers = appDispatchers
+            dispatchers = dispatchers
         )
         val taskId = TaskId(value = "26ca2f97-e3c9-4415-99f8-3d9cbaed7a1f")
 
