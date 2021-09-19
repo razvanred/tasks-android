@@ -40,15 +40,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.flowWithLifecycle
+import app.sedici.tasks.common.compose.rememberFlowWithLifecycle
 import app.sedici.tasks.model.Task
 import app.sedici.tasks.ui.tasks.internal.TasksViewModel
 import app.sedici.tasks.ui.tasks.internal.UiAction
@@ -69,13 +67,8 @@ internal fun Tasks(
     viewModel: TasksViewModel,
     openCreateTask: () -> Unit
 ) {
-    val uiStateFlow = viewModel.uiState
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val uiStateFlowLifecycleAware = remember(uiStateFlow, lifecycle) {
-        uiStateFlow.flowWithLifecycle(lifecycle)
-    }
-
-    val uiState by uiStateFlowLifecycleAware.collectAsState(initial = UiState.Empty)
+    val uiState by rememberFlowWithLifecycle(flow = viewModel.uiState)
+        .collectAsState(initial = UiState.Empty)
 
     val actioner = viewModel::submitUiAction
 
