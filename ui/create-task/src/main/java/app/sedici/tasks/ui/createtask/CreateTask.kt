@@ -35,7 +35,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -46,7 +45,6 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -56,7 +54,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -67,15 +64,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.flowWithLifecycle
 import app.sedici.tasks.common.compose.ConfirmDiscardChangesDialog
+import app.sedici.tasks.common.compose.collectInLaunchedEffect
+import app.sedici.tasks.common.compose.rememberFlowWithLifecycle
 import app.sedici.tasks.ui.createtask.internal.CreateTaskViewModel
 import app.sedici.tasks.ui.createtask.internal.SnackbarError
 import app.sedici.tasks.ui.createtask.internal.UiAction
 import app.sedici.tasks.ui.createtask.internal.UiDestination
 import app.sedici.tasks.ui.createtask.internal.UiState
 import com.google.android.material.datepicker.MaterialDatePicker
-import kotlinx.coroutines.flow.collect
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -96,46 +93,31 @@ internal fun CreateTask(
     viewModel: CreateTaskViewModel,
     onBack: () -> Unit,
 ) {
-    val uiStateFlow = viewModel.uiState
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val uiStateFlowLifecycleAware = remember(uiStateFlow, lifecycle) {
-        uiStateFlow.flowWithLifecycle(lifecycle)
-    }
+    val uiState by rememberFlowWithLifecycle(flow = viewModel.uiState)
+        .collectAsState(initial = UiState.Empty)
 
-    val uiState by uiStateFlowLifecycleAware.collectAsState(initial = UiState.Empty)
+    val pendingDestinationFlow = rememberFlowWithLifecycle(flow = viewModel.pendingDestination)
+    val pendingSnackbarErrorFlow = rememberFlowWithLifecycle(flow = viewModel.pendingSnackbarError)
 
     val actioner = viewModel::submitUiAction
-
-    val pendingUiDestinationFlow = viewModel.pendingUiDestination
-    val pendingUiDestinationFlowLifecycleAware = remember(pendingUiDestinationFlow, lifecycle) {
-        pendingUiDestinationFlow.flowWithLifecycle(lifecycle)
-    }
-
-    val pendingSnackbarErrorFlow = viewModel.pendingSnackbarError
-    val pendingSnackbarErrorFlowLifecycleAware = remember(pendingSnackbarErrorFlow, lifecycle) {
-        pendingSnackbarErrorFlow.flowWithLifecycle(lifecycle)
-    }
 
     val scaffoldState = rememberScaffoldState()
 
     val errorWhileSavingMessage = stringResource(R.string.create_task_error_while_saving_message)
 
-    LaunchedEffect(scaffoldState.snackbarHostState) {
-        pendingSnackbarErrorFlowLifecycleAware.collect { error ->
-            scaffoldState.snackbarHostState.showSnackbar(
-                message = when (error) {
-                    SnackbarError.ErrorWhileSaving -> errorWhileSavingMessage
-                },
-                duration = SnackbarDuration.Short
-            )
+    pendingSnackbarErrorFlow.collectInLaunchedEffect { error ->
+        when (error) {
+            is SnackbarError.ErrorWhileSaving -> {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = errorWhileSavingMessage
+                )
+            }
         }
     }
 
-    LaunchedEffect(lifecycle) {
-        pendingUiDestinationFlowLifecycleAware.collect { destination ->
-            when (destination) {
-                UiDestination.Up -> onBack()
-            }
+    pendingDestinationFlow.collectInLaunchedEffect { destination ->
+        when (destination) {
+            is UiDestination.Up -> onBack()
         }
     }
 

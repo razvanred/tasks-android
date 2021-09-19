@@ -77,8 +77,8 @@ internal class CreateTaskViewModel @Inject constructor(
 
     private val pendingUiAction = MutableSharedFlow<UiAction>()
 
-    private val _pendingUiDestination = MutableSharedFlow<UiDestination>()
-    val pendingUiDestination = _pendingUiDestination.asSharedFlow()
+    private val _pendingDestination = MutableSharedFlow<UiDestination>()
+    val pendingDestination = _pendingDestination.asSharedFlow()
 
     private val _pendingSnackbarError = MutableSharedFlow<SnackbarError>()
     val pendingSnackbarError = _pendingSnackbarError.asSharedFlow()
@@ -111,7 +111,7 @@ internal class CreateTaskViewModel @Inject constructor(
                         if (uiState.shouldShowConfirmDiscardChangesDialog) {
                             showConfirmDiscardChangesDialog.emit(true)
                         } else {
-                            _pendingUiDestination.emit(UiDestination.Up)
+                            _pendingDestination.emit(UiDestination.Up)
                         }
                     }
                     UiAction.CancelDiscardChanges -> {
@@ -119,7 +119,7 @@ internal class CreateTaskViewModel @Inject constructor(
                     }
                     UiAction.ConfirmDiscardChanges -> {
                         showConfirmDiscardChangesDialog.emit(false)
-                        _pendingUiDestination.emit(UiDestination.Up)
+                        _pendingDestination.emit(UiDestination.Up)
                     }
                 }
             }
@@ -133,7 +133,7 @@ internal class CreateTaskViewModel @Inject constructor(
             InvokeStarted -> loadingState.addLoader()
             InvokeSuccess -> {
                 loadingState.removeLoader()
-                _pendingUiDestination.emit(UiDestination.Up)
+                _pendingDestination.emit(UiDestination.Up)
             }
             is InvokeError -> {
                 loadingState.removeLoader()
