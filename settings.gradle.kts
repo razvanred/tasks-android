@@ -1,4 +1,4 @@
-rootProject.name = "SediciTasks-Android"
+rootProject.name = "tasks-android"
 
 include(":model")
 include(":data:local:common")
