@@ -282,6 +282,21 @@ class TaskDaoTest {
         }
     }
 
+    @Test
+    fun setDescriptionById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Go to the gym")
+        val task2 = createTaskEntity(title = "Doctor appointment")
+
+        taskDao.insert(listOf(task1, task2))
+
+        val description = "Get another appointment for the next time"
+
+        taskDao.setDescriptionById(description = description, id = task2.id)
+
+        assertThat(taskDao.getByIdOrNull(id = task2.id)?.description)
+            .isEqualTo(description)
+    }
+
     @After
     fun cleanup() {
         testScope.cleanupTestCoroutines()

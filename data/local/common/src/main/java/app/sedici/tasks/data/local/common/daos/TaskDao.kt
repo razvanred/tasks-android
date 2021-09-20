@@ -57,6 +57,9 @@ interface TaskDao {
     @Query("UPDATE $Tasks SET is_checked = :isChecked WHERE id = :id")
     suspend fun setIsCheckedById(id: TaskEntityId, isChecked: Boolean)
 
+    @Query("UPDATE $Tasks SET description = :description WHERE id = :id")
+    suspend fun setDescriptionById(id: TaskEntityId, description: String)
+
     @Query(QUERY_GET_BY_ID)
     fun observeById(id: TaskEntityId): Flow<TaskEntity?>
 

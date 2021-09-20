@@ -19,7 +19,6 @@ package app.sedici.tasks.data.repository
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
-import app.sedici.tasks.base.common.test.coAssertThrows
 import app.sedici.tasks.data.local.common.daos.TaskDao
 import app.sedici.tasks.data.local.common.model.TaskEntityId
 import app.sedici.tasks.data.local.common.testing.createTaskEntity
@@ -28,21 +27,15 @@ import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
-import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
-import java.io.IOException
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
@@ -87,23 +80,6 @@ class DefaultTaskRepositoryTest {
     }
 
     @Test
-    fun saveNewTask_withFailingTaskDao_checkFailure() = testScope.runBlockingTest {
-        val taskDao: TaskDao = mockk()
-        coEvery { taskDao.insert(task = any()) }.throws(IOException("Stub!"))
-        val taskRepository: TaskRepository = DefaultTaskRepository(taskDao = taskDao)
-
-        val newTask = NewTask(
-            title = "Do the laundry",
-            description = "Before midnight",
-            expiresOn = LocalDate.of(2000, 5, 5)
-        )
-
-        coAssertThrows(IOException::class.java) {
-            taskRepository.saveNewTask(newTask)
-        }
-    }
-
-    @Test
     fun observeAll_checkSuccess() = testScope.runBlockingTest {
         val taskEntity1 = createTaskEntity(
             title = "Play football"
@@ -125,18 +101,6 @@ class DefaultTaskRepositoryTest {
             assertThat(awaitItem()).containsExactly(task1)
 
             cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun observeAll_withFailingTaskDao_checkFailure() = testScope.runBlockingTest {
-        val taskDao: TaskDao = mockk()
-        val taskRepository = DefaultTaskRepository(taskDao = taskDao)
-
-        every { taskDao.observeAll() }.throws(RuntimeException("Stub!"))
-
-        assertThrows(RuntimeException::class.java) {
-            taskRepository.observeTasks()
         }
     }
 
@@ -212,19 +176,21 @@ class DefaultTaskRepositoryTest {
     }
 
     @Test
-    fun observeTaskById_withFailingDao_checkThrows() = testScope.runBlockingTest {
-        val taskDao = spyk(taskDao)
-        val taskRepository = DefaultTaskRepository(taskDao = taskDao)
-        val taskEntity1 = createTaskEntity(title = "Go to the prom")
-        val taskEntity2 = createTaskEntity(title = "Ask Jessica out")
+    fun setTaskDescriptionById_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Watch Rick & Morty")
+        val taskEntity2 = createTaskEntity(title = "Buy a new monitor")
 
         taskDao.insert(listOf(taskEntity1, taskEntity2))
 
-        coEvery { taskDao.observeById(id = taskEntity1.id) }.throws(RuntimeException("Stub!"))
+        val description = "Only on AdultSwim"
 
-        coAssertThrows(RuntimeException::class) {
-            taskRepository.observeTaskById(id = taskEntity1.id.toTaskId())
-        }
+        taskRepository.setTaskDescriptionById(
+            id = taskEntity1.id.toTaskId(),
+            description = description
+        )
+
+        assertThat(taskRepository.getByIdOrNull(id = taskEntity1.id.toTaskId())?.description)
+            .isEqualTo(description)
     }
 
     @After

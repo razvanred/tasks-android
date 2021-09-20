@@ -37,6 +37,8 @@ interface TaskRepository {
 
     suspend fun setTaskIsCheckedById(id: TaskId, isChecked: Boolean)
 
+    suspend fun setTaskDescriptionById(id: TaskId, description: String)
+
     suspend fun getByIdOrNull(id: TaskId): Task?
 
     fun observeTasks(): Flow<List<Task>>
@@ -93,4 +95,8 @@ class DefaultTaskRepository @Inject constructor(
 
     override fun observeTaskById(id: TaskId): Flow<Task?> =
         taskDao.observeById(id = id.toTaskEntityId()).map { entity -> entity?.toTask() }
+
+    override suspend fun setTaskDescriptionById(id: TaskId, description: String) {
+        taskDao.setDescriptionById(id = id.toTaskEntityId(), description = description)
+    }
 }

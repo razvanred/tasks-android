@@ -16,17 +16,16 @@
 
 package app.sedici.tasks.ui.taskdetails
 
-sealed interface TaskDetailsAction {
-    object DeleteTask : TaskDetailsAction
+sealed interface TaskDetailsUiAction {
+    object ShowConfirmDeleteDialog : TaskDetailsUiAction
+    object Delete : TaskDetailsUiAction
+    object DismissConfirmDeleteDialog : TaskDetailsUiAction
 
-    sealed interface AnswerConfirmDeleteTask : TaskDetailsAction {
-        object Delete : AnswerConfirmDeleteTask
-        object Cancel : AnswerConfirmDeleteTask
-    }
+    object ShowEditDescriptionDialog : TaskDetailsUiAction
+    object DismissEditDescriptionDialog : TaskDetailsUiAction
+    data class EditDescription(val description: String) : TaskDetailsUiAction
 
-    object EditTask : TaskDetailsAction
+    object NavigateUp : TaskDetailsUiAction
 
-    object NavigateUp : TaskDetailsAction
-
-    data class EditTaskIsChecked(val checked: Boolean) : TaskDetailsAction
+    data class EditIsChecked(val checked: Boolean) : TaskDetailsUiAction
 }

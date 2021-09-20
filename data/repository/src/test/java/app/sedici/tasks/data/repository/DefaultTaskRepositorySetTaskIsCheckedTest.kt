@@ -17,15 +17,12 @@
 package app.sedici.tasks.data.repository
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import app.sedici.tasks.base.common.test.coAssertThrows
 import app.sedici.tasks.data.local.common.daos.TaskDao
 import app.sedici.tasks.model.NewTask
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
-import io.mockk.coEvery
-import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
@@ -78,28 +75,6 @@ class DefaultTaskRepositorySetTaskIsCheckedTest(private val isTaskChecked: Boole
 
         assertThat(taskDao.getByIdOrNull(id = id.toTaskEntityId())?.isChecked)
             .isEqualTo(isTaskChecked)
-    }
-
-    @Test
-    fun setTaskIsChecked_withFailingDao_checkFailure() = testScope.runBlockingTest {
-        val taskDao: TaskDao = mockk()
-        coEvery { taskDao.insert(task = any()) } returns Unit
-        val taskRepository = DefaultTaskRepository(taskDao = taskDao)
-
-        val newTask = NewTask(
-            title = "Get a dog",
-            description = "",
-            expiresOn = null
-        )
-
-        val id = taskRepository.saveNewTask(newTask)
-
-        coEvery { taskDao.setIsCheckedById(id = id.toTaskEntityId(), isChecked = isTaskChecked) }
-            .throws(RuntimeException("Stub!"))
-
-        coAssertThrows(RuntimeException::class.java) {
-            taskRepository.setTaskIsCheckedById(id = id, isChecked = isTaskChecked)
-        }
     }
 
     @After

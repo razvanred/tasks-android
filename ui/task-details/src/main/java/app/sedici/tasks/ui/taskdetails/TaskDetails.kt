@@ -28,7 +28,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ContentAlpha
@@ -43,9 +45,12 @@ import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -56,10 +61,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.sedici.tasks.common.compose.TaskBottomBar
 import app.sedici.tasks.common.compose.collectInLaunchedEffect
@@ -119,7 +131,7 @@ internal fun TaskDetails(
         }
     }
 
-    BackHandler(onBack = { actioner(TaskDetailsAction.NavigateUp) })
+    BackHandler(onBack = { actioner(TaskDetailsUiAction.NavigateUp) })
 
     TaskDetails(
         uiState = uiState,
@@ -131,16 +143,35 @@ internal fun TaskDetails(
 @Composable
 internal fun TaskDetails(
     uiState: TaskDetailsUiState,
-    actioner: (TaskDetailsAction) -> Unit,
+    actioner: (TaskDetailsUiAction) -> Unit,
     scaffoldState: ScaffoldState,
 ) {
-    if (uiState.showDeleteTaskConfirmDialog) {
+    if (uiState.showConfirmDeleteDialog) {
         DeleteTaskConfirmDialog(
             onDismissClick = {
-                actioner(TaskDetailsAction.AnswerConfirmDeleteTask.Cancel)
+                actioner(TaskDetailsUiAction.DismissConfirmDeleteDialog)
             },
             onDeleteClick = {
-                actioner(TaskDetailsAction.AnswerConfirmDeleteTask.Delete)
+                actioner(TaskDetailsUiAction.DismissConfirmDeleteDialog)
+                actioner(TaskDetailsUiAction.Delete)
+            }
+        )
+    }
+
+    if (uiState.showEditDescriptionDialog && uiState.task != null) {
+        var description by rememberSaveable { mutableStateOf(uiState.task.description) }
+
+        EditDescriptionDialog(
+            onConfirmClick = {
+                actioner(TaskDetailsUiAction.EditDescription(description = description))
+                actioner(TaskDetailsUiAction.DismissEditDescriptionDialog)
+            },
+            onCancelClick = {
+                actioner(TaskDetailsUiAction.DismissEditDescriptionDialog)
+            },
+            value = description,
+            onValueChange = { newValue ->
+                description = newValue
             }
         )
     }
@@ -149,9 +180,9 @@ internal fun TaskDetails(
         scaffoldState = scaffoldState,
         topBar = {
             TaskDetailsAppBar(
-                navigateUp = { actioner(TaskDetailsAction.NavigateUp) },
+                navigateUp = { actioner(TaskDetailsUiAction.NavigateUp) },
                 deleteTask = {
-                    actioner(TaskDetailsAction.DeleteTask)
+                    actioner(TaskDetailsUiAction.ShowConfirmDeleteDialog)
                 }
             )
             if (uiState.loading) {
@@ -183,7 +214,7 @@ internal fun TaskDetails(
                     checked = task.isChecked,
                     onCheckedChange = { checked ->
                         actioner(
-                            TaskDetailsAction.EditTaskIsChecked(checked = checked)
+                            TaskDetailsUiAction.EditIsChecked(checked = checked)
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -197,7 +228,7 @@ internal fun TaskDetails(
 private fun TaskDetailsContent(
     modifier: Modifier = Modifier,
     task: Task,
-    actioner: (TaskDetailsAction) -> Unit,
+    actioner: (TaskDetailsUiAction) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -219,7 +250,11 @@ private fun TaskDetailsContent(
             Column {
                 TaskDescriptionItem(
                     modifier = Modifier
-                        .clickable(onClick = {})
+                        .clickable(
+                            onClick = {
+                                actioner(TaskDetailsUiAction.ShowEditDescriptionDialog)
+                            }
+                        )
                         .fillMaxWidth(),
                     description = task.description,
                 )
@@ -438,5 +473,60 @@ private fun MarkAsNotCompletedButton(
             Text(text = stringResource(R.string.task_details_mark_task_as_not_completed_button))
         },
         onClick = onClick
+    )
+}
+
+@Composable
+private fun EditDescriptionDialog(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onConfirmClick: () -> Unit,
+    onCancelClick: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = { },
+        content = {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colors.surface,
+                contentColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(32.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.task_details_edit_description_dialog_title),
+                        style = MaterialTheme.typography.h6
+                    )
+                    TextField(
+                        value = value,
+                        onValueChange = onValueChange,
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            keyboardType = KeyboardType.Text,
+                            autoCorrect = true,
+                            imeAction = ImeAction.Done
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(onClick = onCancelClick) {
+                            Text(text = stringResource(android.R.string.cancel))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = onConfirmClick) {
+                            Text(text = stringResource(R.string.task_details_confirm_edit_button))
+                        }
+                    }
+                }
+            }
+        }
     )
 }

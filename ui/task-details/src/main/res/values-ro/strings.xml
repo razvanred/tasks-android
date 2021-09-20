@@ -11,4 +11,6 @@
     <string name="task_details_mark_task_as_not_completed_button">Marcați ca nefinalizat</string>
     <string name="task_details_mark_task_as_completed_button">Marcați ca finalizat</string>
     <string name="task_details_unknown_error_message">Eroare necunoscută</string>
+    <string name="task_details_confirm_edit_button">Editați</string>
+    <string name="task_details_edit_description_dialog_title">Editați descriere</string>
 </resources>

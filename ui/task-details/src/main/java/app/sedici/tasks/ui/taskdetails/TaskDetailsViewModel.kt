@@ -25,6 +25,7 @@ import app.sedici.tasks.base.common.InvokeStarted
 import app.sedici.tasks.base.common.InvokeSuccess
 import app.sedici.tasks.domain.DeleteTaskById
 import app.sedici.tasks.domain.ObserveTaskById
+import app.sedici.tasks.domain.SetTaskDescriptionById
 import app.sedici.tasks.domain.SetTaskIsCheckedById
 import app.sedici.tasks.model.TaskId
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,12 +43,14 @@ class TaskDetailsViewModel @Inject constructor(
     observeTaskById: ObserveTaskById,
     private val deleteTaskById: DeleteTaskById,
     private val setTaskIsCheckedById: SetTaskIsCheckedById,
+    private val setTaskDescriptionById: SetTaskDescriptionById,
 ) : ViewModel() {
     private val taskId = TaskId(value = savedStateHandle.get<String>("taskId")!!)
 
-    private val showDeleteTaskConfirmDialog = MutableStateFlow(false)
+    private val showConfirmDeleteDialog = MutableStateFlow(false)
+    private val showEditDescriptionDialog = MutableStateFlow(false)
 
-    private val pendingUiAction = MutableSharedFlow<TaskDetailsAction>()
+    private val pendingUiAction = MutableSharedFlow<TaskDetailsUiAction>()
 
     private val _pendingUiDestination = MutableSharedFlow<TaskDetailsDestination>()
     val pendingUiDestination = _pendingUiDestination.asSharedFlow()
@@ -59,13 +62,15 @@ class TaskDetailsViewModel @Inject constructor(
 
     val uiState = combine(
         observeTaskById.flow,
-        showDeleteTaskConfirmDialog,
+        showConfirmDeleteDialog,
         loadingState.observable,
-    ) { task, showDeleteTaskConfirmDialog, loading ->
+        showEditDescriptionDialog,
+    ) { task, showConfirmDeleteDialog, loading, showEditDescriptionDialog ->
         TaskDetailsUiState(
-            showDeleteTaskConfirmDialog = showDeleteTaskConfirmDialog,
+            showConfirmDeleteDialog = showConfirmDeleteDialog,
             loading = loading,
             task = task,
+            showEditDescriptionDialog = showEditDescriptionDialog,
         )
     }
 
@@ -77,17 +82,39 @@ class TaskDetailsViewModel @Inject constructor(
         observeTaskById(id = taskId)
     }
 
-    private suspend fun handleUiAction(uiAction: TaskDetailsAction) {
+    private suspend fun handleUiAction(uiAction: TaskDetailsUiAction) {
         when (uiAction) {
-            TaskDetailsAction.DeleteTask -> showDeleteTaskConfirmDialog.emit(true)
-            is TaskDetailsAction.AnswerConfirmDeleteTask -> {
-                handleConfirmDeleteTaskAnswer(uiAction)
+            TaskDetailsUiAction.ShowConfirmDeleteDialog -> {
+                showConfirmDeleteDialog.emit(true)
             }
-            TaskDetailsAction.EditTask -> TODO("navigate to edit task screen")
-            TaskDetailsAction.NavigateUp -> {
+            TaskDetailsUiAction.Delete -> {
+                deleteTaskById(taskId = taskId).collect { status ->
+                    when (status) {
+                        InvokeStarted -> loadingState.addLoader()
+                        InvokeSuccess -> {
+                            loadingState.removeLoader()
+                            _pendingUiDestination.emit(TaskDetailsDestination.Up)
+                        }
+                        is InvokeError -> {
+                            _pendingSnackbarError.emit(TaskDetailsSnackbarError.ErrorWhileDeleting)
+                            loadingState.removeLoader()
+                        }
+                    }
+                }
+            }
+            TaskDetailsUiAction.DismissConfirmDeleteDialog -> {
+                showConfirmDeleteDialog.emit(false)
+            }
+            TaskDetailsUiAction.ShowEditDescriptionDialog -> {
+                showEditDescriptionDialog.emit(true)
+            }
+            TaskDetailsUiAction.DismissEditDescriptionDialog -> {
+                showEditDescriptionDialog.emit(false)
+            }
+            TaskDetailsUiAction.NavigateUp -> {
                 _pendingUiDestination.emit(TaskDetailsDestination.Up)
             }
-            is TaskDetailsAction.EditTaskIsChecked -> {
+            is TaskDetailsUiAction.EditIsChecked -> {
                 setTaskIsCheckedById(id = taskId, isChecked = uiAction.checked).collect { status ->
                     when (status) {
                         InvokeStarted -> loadingState.addLoader()
@@ -104,33 +131,25 @@ class TaskDetailsViewModel @Inject constructor(
                     }
                 }
             }
-        }
-    }
-
-    private suspend fun handleConfirmDeleteTaskAnswer(answer: TaskDetailsAction.AnswerConfirmDeleteTask) {
-        showDeleteTaskConfirmDialog.emit(false)
-        if (answer != TaskDetailsAction.AnswerConfirmDeleteTask.Delete) {
-            return
-        }
-
-        viewModelScope.launch {
-            deleteTaskById(taskId = taskId).collect { status ->
-                when (status) {
-                    InvokeStarted -> loadingState.addLoader()
-                    InvokeSuccess -> {
-                        loadingState.removeLoader()
-                        _pendingUiDestination.emit(TaskDetailsDestination.Up)
-                    }
-                    is InvokeError -> {
-                        _pendingSnackbarError.emit(TaskDetailsSnackbarError.ErrorWhileDeleting)
-                        loadingState.removeLoader()
+            is TaskDetailsUiAction.EditDescription -> {
+                setTaskDescriptionById(
+                    id = taskId,
+                    description = uiAction.description
+                ).collect { status ->
+                    when (status) {
+                        InvokeStarted -> loadingState.addLoader()
+                        InvokeSuccess -> loadingState.removeLoader()
+                        is InvokeError -> {
+                            loadingState.removeLoader()
+                            _pendingSnackbarError.emit(TaskDetailsSnackbarError.UnknownError)
+                        }
                     }
                 }
             }
         }
     }
 
-    fun submitUiAction(uiAction: TaskDetailsAction) {
+    fun submitUiAction(uiAction: TaskDetailsUiAction) {
         viewModelScope.launch {
             pendingUiAction.emit(uiAction)
         }

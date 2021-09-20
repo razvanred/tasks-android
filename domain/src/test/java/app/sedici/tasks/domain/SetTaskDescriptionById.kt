@@ -25,13 +25,12 @@ import app.sedici.tasks.base.common.InvokeStarted
 import app.sedici.tasks.base.common.InvokeSuccess
 import app.sedici.tasks.data.repository.TaskRepository
 import app.sedici.tasks.model.NewTask
-import app.sedici.tasks.model.TaskId
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import io.mockk.coEvery
-import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -49,7 +48,7 @@ import kotlin.time.ExperimentalTime
 @HiltAndroidTest
 @Config(application = HiltTestApplication::class)
 @OptIn(ExperimentalTime::class, ExperimentalCoroutinesApi::class)
-class DeleteTaskByIdTest {
+class SetTaskDescriptionByIdTest {
 
     private val dispatchers = AppCoroutineDispatchers(
         main = TestCoroutineDispatcher(),
@@ -77,7 +76,7 @@ class DeleteTaskByIdTest {
 
     @Test
     fun invoke_checkSuccess() = testScope.runBlockingTest {
-        val deleteTaskById = DeleteTaskById(
+        val setTaskDescriptionById = SetTaskDescriptionById(
             dispatchers = dispatchers,
             taskRepository = taskRepository
         )
@@ -92,33 +91,42 @@ class DeleteTaskByIdTest {
             description = "You will find Amanda there"
         )
         val task1Id = taskRepository.saveNewTask(newTask = newTask1)
-        val task2Id = taskRepository.saveNewTask(newTask = newTask2)
+        taskRepository.saveNewTask(newTask = newTask2)
 
-        deleteTaskById(taskId = task1Id).test {
+        val description = "It's Saturday today"
+
+        setTaskDescriptionById(
+            id = task1Id,
+            description = description
+        ).test {
             assertThat(awaitItem()).isEqualTo(InvokeStarted)
             assertThat(awaitItem()).isEqualTo(InvokeSuccess)
-            awaitComplete()
+            cancelAndConsumeRemainingEvents()
         }
 
-        taskRepository.observeTasks().test {
-            assertThat(awaitItem().map { it.id })
-                .containsExactly(task2Id)
-            cancelAndIgnoreRemainingEvents()
-        }
+        assertThat(taskRepository.getByIdOrNull(id = task1Id)?.description)
+            .isEqualTo(description)
     }
 
     @Test
     fun invoke_withFailingRepository_checkEmitsFailure() = testScope.runBlockingTest {
-        val taskRepository: TaskRepository = mockk()
-        val deleteTaskById = DeleteTaskById(
+        val taskRepository = spyk(taskRepository)
+        val setTaskDescriptionById = SetTaskDescriptionById(
             taskRepository = taskRepository,
             dispatchers = dispatchers
         )
-        val taskId = TaskId(value = "26ca2f97-e3c9-4415-99f8-3d9cbaed7a1f")
+        val newTask = NewTask(
+            title = "Let's go to the mall",
+            expiresOn = null,
+            description = ""
+        )
+        val taskId = taskRepository.saveNewTask(newTask = newTask)
+        val newDescription = "TODAY"
 
-        coEvery { taskRepository.deleteTask(id = taskId) }.throws(RuntimeException("Stub!"))
+        coEvery { taskRepository.setTaskDescriptionById(id = taskId, description = newDescription) }
+            .throws(RuntimeException("Stub!"))
 
-        deleteTaskById(taskId).test {
+        setTaskDescriptionById(id = taskId, description = newDescription).test {
             assertThat(awaitItem()).isEqualTo(InvokeStarted)
             val result = awaitItem()
             assertThat(result).isInstanceOf(InvokeError::class.java)

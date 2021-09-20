@@ -11,4 +11,6 @@
     <string name="task_details_mark_task_as_not_completed_button">Segna come non completata</string>
     <string name="task_details_mark_task_as_completed_button">Segna come completata</string>
     <string name="task_details_unknown_error_message">Errore sconosciuto</string>
+    <string name="task_details_confirm_edit_button">Modifica</string>
+    <string name="task_details_edit_description_dialog_title">Modifica descrizione</string>
 </resources>

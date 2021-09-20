@@ -23,13 +23,15 @@ import app.sedici.tasks.model.Task
 data class TaskDetailsUiState(
     val task: Task?,
     val loading: Boolean,
-    val showDeleteTaskConfirmDialog: Boolean,
+    val showConfirmDeleteDialog: Boolean,
+    val showEditDescriptionDialog: Boolean,
 ) {
     companion object {
         val Empty = TaskDetailsUiState(
             task = null,
             loading = false,
-            showDeleteTaskConfirmDialog = false,
+            showConfirmDeleteDialog = false,
+            showEditDescriptionDialog = false,
         )
     }
 }
