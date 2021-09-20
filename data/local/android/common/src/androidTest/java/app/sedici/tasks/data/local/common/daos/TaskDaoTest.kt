@@ -256,6 +256,32 @@ class TaskDaoTest {
         assertThat(taskDao.getAll()).containsExactly(task1, task2)
     }
 
+    @Test
+    fun observeById_checkEmission() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Play with Emma at the park")
+        val task2 = createTaskEntity(title = "Buy a bicycle")
+
+        taskDao.insert(listOf(task1, task2))
+
+        taskDao.observeById(task1.id).test {
+            assertThat(awaitItem()?.id).isEqualTo(task1.id)
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun observeById_withoutTask_checkNullEmission() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Play with Emma at the park")
+        val task2 = createTaskEntity(title = "Buy a bicycle")
+
+        taskDao.insert(listOf(task2))
+
+        taskDao.observeById(task1.id).test {
+            assertThat(awaitItem()).isNull()
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
     @After
     fun cleanup() {
         testScope.cleanupTestCoroutines()

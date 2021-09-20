@@ -19,7 +19,23 @@ package app.sedici.tasks.base.common.test
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertThrows
+import kotlin.reflect.KClass
 
+suspend fun <T : Throwable> coAssertThrows(
+    expectedThrowable: KClass<T>,
+    block: suspend () -> Unit
+): T = coAssertThrows(
+    expectedThrowable = expectedThrowable.java,
+    block = block
+)
+
+@Deprecated(
+    "Use coAssertThrows with KClass overload",
+    replaceWith = ReplaceWith(
+        expression = "coAssertThrows",
+        imports = ["app.sedici.tasks.base.common.test.coAssertThrows"]
+    )
+)
 suspend fun <T : Throwable> coAssertThrows(
     expectedThrowable: Class<T>,
     block: suspend () -> Unit

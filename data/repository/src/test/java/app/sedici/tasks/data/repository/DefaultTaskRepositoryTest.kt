@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import app.sedici.tasks.base.common.test.coAssertThrows
 import app.sedici.tasks.data.local.common.daos.TaskDao
+import app.sedici.tasks.data.local.common.model.TaskEntityId
 import app.sedici.tasks.data.local.common.testing.createTaskEntity
 import app.sedici.tasks.model.NewTask
 import com.google.common.truth.Truth.assertThat
@@ -30,6 +31,7 @@ import dagger.hilt.android.testing.HiltTestApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
@@ -186,6 +188,43 @@ class DefaultTaskRepositoryTest {
         taskRepository.deleteTask(task = taskEntity3.toTask())
 
         assertThat(taskDao.getAll()).containsExactly(taskEntity1, taskEntity2)
+    }
+
+    @Test
+    fun observeTaskById_checkEmission() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Go to the prom")
+        val taskEntity2 = createTaskEntity(title = "Ask Jessica out")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        taskRepository.observeTaskById(id = taskEntity1.id.toTaskId()).test {
+            assertThat(awaitItem()?.id).isEqualTo(taskEntity1.id.toTaskId())
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun observeTaskById_withoutTask_checkNullEmission() = testScope.runBlockingTest {
+        taskRepository.observeTaskById(id = TaskEntityId.create().toTaskId()).test {
+            assertThat(awaitItem()?.id).isNull()
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun observeTaskById_withFailingDao_checkThrows() = testScope.runBlockingTest {
+        val taskDao = spyk(taskDao)
+        val taskRepository = DefaultTaskRepository(taskDao = taskDao)
+        val taskEntity1 = createTaskEntity(title = "Go to the prom")
+        val taskEntity2 = createTaskEntity(title = "Ask Jessica out")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        coEvery { taskDao.observeById(id = taskEntity1.id) }.throws(RuntimeException("Stub!"))
+
+        coAssertThrows(RuntimeException::class) {
+            taskRepository.observeTaskById(id = taskEntity1.id.toTaskId())
+        }
     }
 
     @After
