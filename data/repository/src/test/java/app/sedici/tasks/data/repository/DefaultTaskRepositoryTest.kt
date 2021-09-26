@@ -37,6 +37,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 
@@ -191,6 +194,46 @@ class DefaultTaskRepositoryTest {
 
         assertThat(taskRepository.getByIdOrNull(id = taskEntity1.id.toTaskId())?.description)
             .isEqualTo(description)
+    }
+
+    @Test
+    fun setTaskExpirationDateById_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(
+            title = "Watch Spiderman 2002"
+        )
+        val date = OffsetDateTime.of(
+            LocalDateTime.of(2003, 1, 6, 0, 0),
+            ZoneOffset.UTC
+        )
+        taskDao.insert(taskEntity1)
+
+        taskRepository.setTaskExpirationDateById(
+            expirationDate = date,
+            id = taskEntity1.id.toTaskId()
+        )
+
+        assertThat(taskDao.getByIdOrNull(taskEntity1.id)?.expiresOn)
+            .isEqualTo(date)
+    }
+
+    @Test
+    fun removeTaskExpirationDateById_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(
+            title = "Watch Spiderman 2002",
+            expiresOn = OffsetDateTime.of(
+                LocalDateTime.of(2003, 1, 6, 0, 0),
+                ZoneOffset.UTC
+            )
+        )
+        taskDao.insert(taskEntity1)
+
+        taskRepository.setTaskExpirationDateById(
+            expirationDate = null,
+            id = taskEntity1.id.toTaskId()
+        )
+
+        assertThat(taskDao.getByIdOrNull(taskEntity1.id)?.expiresOn)
+            .isNull()
     }
 
     @After

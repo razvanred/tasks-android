@@ -26,6 +26,7 @@ import app.sedici.tasks.base.common.InvokeSuccess
 import app.sedici.tasks.domain.DeleteTaskById
 import app.sedici.tasks.domain.ObserveTaskById
 import app.sedici.tasks.domain.SetTaskDescriptionById
+import app.sedici.tasks.domain.SetTaskExpirationDateById
 import app.sedici.tasks.domain.SetTaskIsCheckedById
 import app.sedici.tasks.model.TaskId
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,11 +45,13 @@ class TaskDetailsViewModel @Inject constructor(
     private val deleteTaskById: DeleteTaskById,
     private val setTaskIsCheckedById: SetTaskIsCheckedById,
     private val setTaskDescriptionById: SetTaskDescriptionById,
+    private val setTaskExpirationDateById: SetTaskExpirationDateById,
 ) : ViewModel() {
     private val taskId = TaskId(value = savedStateHandle.get<String>("taskId")!!)
 
     private val showConfirmDeleteDialog = MutableStateFlow(false)
     private val showEditDescriptionDialog = MutableStateFlow(false)
+    private val showExpirationDatePicker = MutableStateFlow(false)
 
     private val pendingUiAction = MutableSharedFlow<TaskDetailsUiAction>()
 
@@ -65,12 +68,14 @@ class TaskDetailsViewModel @Inject constructor(
         showConfirmDeleteDialog,
         loadingState.observable,
         showEditDescriptionDialog,
-    ) { task, showConfirmDeleteDialog, loading, showEditDescriptionDialog ->
+        showExpirationDatePicker,
+    ) { task, showConfirmDeleteDialog, loading, showEditDescriptionDialog, showExpirationDatePicker ->
         TaskDetailsUiState(
             showConfirmDeleteDialog = showConfirmDeleteDialog,
             loading = loading,
             task = task,
             showEditDescriptionDialog = showEditDescriptionDialog,
+            showExpirationDatePicker = showExpirationDatePicker,
         )
     }
 
@@ -113,6 +118,27 @@ class TaskDetailsViewModel @Inject constructor(
             }
             TaskDetailsUiAction.NavigateUp -> {
                 _pendingUiDestination.emit(TaskDetailsDestination.Up)
+            }
+            TaskDetailsUiAction.ShowExpirationDatePicker -> {
+                showExpirationDatePicker.emit(true)
+            }
+            TaskDetailsUiAction.DismissExpirationDatePicker -> {
+                showExpirationDatePicker.emit(false)
+            }
+            is TaskDetailsUiAction.EditExpirationDate -> {
+                setTaskExpirationDateById(
+                    id = taskId,
+                    expirationDate = uiAction.expirationDate
+                ).collect { status ->
+                    when (status) {
+                        InvokeStarted -> loadingState.addLoader()
+                        InvokeSuccess -> loadingState.removeLoader()
+                        is InvokeError -> {
+                            loadingState.removeLoader()
+                            _pendingSnackbarError.emit(TaskDetailsSnackbarError.UnknownError)
+                        }
+                    }
+                }
             }
             is TaskDetailsUiAction.EditIsChecked -> {
                 setTaskIsCheckedById(id = taskId, isChecked = uiAction.checked).collect { status ->

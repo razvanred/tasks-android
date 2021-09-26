@@ -13,4 +13,6 @@
     <string name="task_details_unknown_error_message">Eroare necunoscută</string>
     <string name="task_details_confirm_edit_button">Editați</string>
     <string name="task_details_edit_description_dialog_title">Editați descriere</string>
+    <string name="task_details_expires_on_title_date_picker">Selectați o dată de expirare</string>
+    <string name="task_details_edit_button_cd">Editează</string>
 </resources>

@@ -29,6 +29,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 
@@ -295,6 +298,42 @@ class TaskDaoTest {
 
         assertThat(taskDao.getByIdOrNull(id = task2.id)?.description)
             .isEqualTo(description)
+    }
+
+    @Test
+    fun removeExpirationDateById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(
+            title = "Hello world",
+            expiresOn = OffsetDateTime.of(
+                LocalDateTime.of(2020, 1, 6, 0, 0),
+                ZoneOffset.UTC
+            )
+        )
+
+        taskDao.insert(task1)
+
+        taskDao.setExpiresOnById(id = task1.id, expiresOn = null)
+
+        assertThat(taskDao.getByIdOrNull(task1.id)?.expiresOn)
+            .isNull()
+    }
+
+    @Test
+    fun setExpirationDateById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(
+            title = "Hello world",
+        )
+        val date = OffsetDateTime.of(
+            LocalDateTime.of(2022, 1, 6, 0, 0),
+            ZoneOffset.UTC
+        )
+
+        taskDao.insert(task1)
+
+        taskDao.setExpiresOnById(id = task1.id, expiresOn = date)
+
+        assertThat(taskDao.getByIdOrNull(task1.id)?.expiresOn)
+            .isEqualTo(date)
     }
 
     @After

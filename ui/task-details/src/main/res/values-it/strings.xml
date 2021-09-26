@@ -13,4 +13,6 @@
     <string name="task_details_unknown_error_message">Errore sconosciuto</string>
     <string name="task_details_confirm_edit_button">Modifica</string>
     <string name="task_details_edit_description_dialog_title">Modifica descrizione</string>
+    <string name="task_details_expires_on_title_date_picker">Seleziona una data di scadenza</string>
+    <string name="task_details_edit_button_cd">Modifica</string>
 </resources>

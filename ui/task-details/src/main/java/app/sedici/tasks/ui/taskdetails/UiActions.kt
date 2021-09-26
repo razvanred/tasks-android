@@ -16,6 +16,8 @@
 
 package app.sedici.tasks.ui.taskdetails
 
+import java.time.LocalDate
+
 sealed interface TaskDetailsUiAction {
     object ShowConfirmDeleteDialog : TaskDetailsUiAction
     object Delete : TaskDetailsUiAction
@@ -28,4 +30,8 @@ sealed interface TaskDetailsUiAction {
     object NavigateUp : TaskDetailsUiAction
 
     data class EditIsChecked(val checked: Boolean) : TaskDetailsUiAction
+
+    object ShowExpirationDatePicker : TaskDetailsUiAction
+    object DismissExpirationDatePicker : TaskDetailsUiAction
+    data class EditExpirationDate(val expirationDate: LocalDate?) : TaskDetailsUiAction
 }

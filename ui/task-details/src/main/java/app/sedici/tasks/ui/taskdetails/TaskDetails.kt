@@ -41,7 +41,6 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
-import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarDuration
@@ -53,7 +52,9 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.rememberScaffoldState
@@ -66,18 +67,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.sedici.tasks.common.compose.TaskBottomBar
 import app.sedici.tasks.common.compose.collectInLaunchedEffect
 import app.sedici.tasks.common.compose.rememberFlowWithLifecycle
 import app.sedici.tasks.model.Task
+import com.google.android.material.datepicker.MaterialDatePicker
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 @Composable
 fun TaskDetails(
@@ -146,6 +153,8 @@ internal fun TaskDetails(
     actioner: (TaskDetailsUiAction) -> Unit,
     scaffoldState: ScaffoldState,
 ) {
+    val task = uiState.task
+
     if (uiState.showConfirmDeleteDialog) {
         DeleteTaskConfirmDialog(
             onDismissClick = {
@@ -158,8 +167,8 @@ internal fun TaskDetails(
         )
     }
 
-    if (uiState.showEditDescriptionDialog && uiState.task != null) {
-        var description by rememberSaveable { mutableStateOf(uiState.task.description) }
+    if (uiState.showEditDescriptionDialog && task != null) {
+        var description by rememberSaveable { mutableStateOf(task.description) }
 
         EditDescriptionDialog(
             onConfirmClick = {
@@ -172,6 +181,20 @@ internal fun TaskDetails(
             value = description,
             onValueChange = { newValue ->
                 description = newValue
+            }
+        )
+    }
+
+    val context = LocalContext.current as FragmentActivity
+
+    if (uiState.showExpirationDatePicker && task != null) {
+        showExpiresOnDatePicker(
+            context = context,
+            onDismiss = { actioner(TaskDetailsUiAction.DismissExpirationDatePicker) },
+            selectedDate = task.expiresOn,
+            onDateChange = {
+                actioner(TaskDetailsUiAction.EditExpirationDate(expirationDate = it))
+                actioner(TaskDetailsUiAction.DismissExpirationDatePicker)
             }
         )
     }
@@ -196,8 +219,6 @@ internal fun TaskDetails(
                     .fillMaxSize()
                     .padding(contentPadding)
             ) {
-                val task = uiState.task
-
                 if (task != null) {
                     TaskDetailsContent(
                         task = task,
@@ -207,8 +228,6 @@ internal fun TaskDetails(
             }
         },
         bottomBar = {
-            val task = uiState.task
-
             if (task != null) {
                 TaskDetailsBottomBar(
                     checked = task.isChecked,
@@ -230,6 +249,19 @@ private fun TaskDetailsContent(
     task: Task,
     actioner: (TaskDetailsUiAction) -> Unit,
 ) {
+    val onEditDescriptionClick = {
+        actioner(TaskDetailsUiAction.ShowEditDescriptionDialog)
+    }
+    val onClearDescriptionClick = {
+        actioner(TaskDetailsUiAction.EditDescription(description = ""))
+    }
+    val onEditExpirationDateClick = {
+        actioner(TaskDetailsUiAction.ShowExpirationDatePicker)
+    }
+    val onClearExpirationDateClick = {
+        actioner(TaskDetailsUiAction.EditExpirationDate(expirationDate = null))
+    }
+
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -250,20 +282,20 @@ private fun TaskDetailsContent(
             Column {
                 TaskDescriptionItem(
                     modifier = Modifier
-                        .clickable(
-                            onClick = {
-                                actioner(TaskDetailsUiAction.ShowEditDescriptionDialog)
-                            }
-                        )
+                        .clickable(onClick = onEditDescriptionClick)
                         .fillMaxWidth(),
                     description = task.description,
+                    onEditClick = onEditDescriptionClick,
+                    onClearClick = onClearDescriptionClick,
                 )
                 Divider()
                 TaskExpirationDateItem(
                     modifier = Modifier
-                        .clickable(onClick = {})
+                        .clickable(onClick = onEditExpirationDateClick)
                         .fillMaxWidth(),
-                    expiresOn = task.expiresOn
+                    expiresOn = task.expiresOn,
+                    onEditClick = onEditExpirationDateClick,
+                    onClearClick = onClearExpirationDateClick,
                 )
                 Divider()
             }
@@ -278,7 +310,9 @@ private fun TaskDetailsContent(
 @Composable
 private fun TaskDescriptionItem(
     modifier: Modifier = Modifier,
-    description: String
+    description: String,
+    onEditClick: () -> Unit,
+    onClearClick: () -> Unit,
 ) {
     TaskDetailsItem(
         modifier = modifier,
@@ -288,18 +322,10 @@ private fun TaskDescriptionItem(
                 contentDescription = null
             )
         },
-        text = {
-            Text(
-                text = description.ifBlank {
-                    stringResource(R.string.task_details_no_description_provided_message)
-                }
-            )
-        },
-        contentAlpha = if (description.isBlank()) {
-            ContentAlpha.medium
-        } else {
-            ContentAlpha.high
-        }
+        text = description,
+        placeholder = stringResource(R.string.task_details_no_description_provided_message),
+        onEditClick = onEditClick,
+        onClearClick = onClearClick
     )
 }
 
@@ -307,26 +333,21 @@ private fun TaskDescriptionItem(
 private fun TaskExpirationDateItem(
     modifier: Modifier = Modifier,
     expiresOn: LocalDate?,
+    onEditClick: () -> Unit,
+    onClearClick: () -> Unit,
 ) {
     TaskDetailsItem(
-        modifier = modifier,
+        modifier = modifier.clickable(onClick = onEditClick),
         icon = {
             Icon(
                 imageVector = Icons.Default.Event,
                 contentDescription = null
             )
         },
-        text = {
-            Text(
-                text = expiresOn?.toString()
-                    ?: stringResource(R.string.task_details_no_expiration_date_provided_message)
-            )
-        },
-        contentAlpha = if (expiresOn == null) {
-            ContentAlpha.medium
-        } else {
-            ContentAlpha.high
-        }
+        text = expiresOn?.toString() ?: "",
+        placeholder = stringResource(R.string.task_details_no_expiration_date_provided_message),
+        onEditClick = onEditClick,
+        onClearClick = onClearClick
     )
 }
 
@@ -334,37 +355,60 @@ private fun TaskExpirationDateItem(
 private fun TaskDetailsItem(
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
-    text: @Composable () -> Unit,
-    contentAlpha: Float,
+    text: String,
+    placeholder: String = "",
+    onEditClick: () -> Unit,
+    onClearClick: () -> Unit,
 ) {
-    Row(
-        modifier = modifier.padding(vertical = 16.dp, horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        if (icon != null) {
+    val textBlank = text.isBlank()
+
+    CompositionLocalProvider(
+        LocalContentAlpha provides if (textBlank) ContentAlpha.medium else ContentAlpha.high,
+        content = {
             Row(
-                modifier = Modifier.size(24.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                CompositionLocalProvider(
-                    LocalContentAlpha provides contentAlpha,
-                    content = icon
+                if (icon != null) {
+                    Row(
+                        modifier = Modifier.size(24.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        icon()
+                    }
+                }
+                Text(
+                    text = if (textBlank) placeholder else text,
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier.weight(1f)
                 )
+                if (textBlank) {
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(R.string.task_details_edit_button_cd)
+                            )
+                        },
+                        onClick = onEditClick
+                    )
+                } else {
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = stringResource(R.string.cd_clear)
+                            )
+                        },
+                        onClick = onClearClick
+                    )
+                }
             }
         }
-        Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ProvideTextStyle(value = MaterialTheme.typography.body1) {
-                CompositionLocalProvider(
-                    LocalContentAlpha provides contentAlpha,
-                    content = text
-                )
-            }
-        }
-    }
+    )
 }
 
 @Composable
@@ -529,4 +573,28 @@ private fun EditDescriptionDialog(
             }
         }
     )
+}
+
+private fun showExpiresOnDatePicker(
+    context: FragmentActivity,
+    onDismiss: () -> Unit,
+    selectedDate: LocalDate?,
+    onDateChange: (LocalDate) -> Unit,
+) {
+    val picker = MaterialDatePicker.Builder.datePicker()
+        .setTitleText(R.string.task_details_expires_on_title_date_picker)
+        .setSelection(
+            selectedDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+                ?: MaterialDatePicker.todayInUtcMilliseconds()
+        )
+        .build()
+
+    picker.addOnDismissListener { onDismiss() }
+
+    picker.addOnPositiveButtonClickListener { epochMilli ->
+        val newDate = Instant.ofEpochMilli(epochMilli).atZone(ZoneId.systemDefault()).toLocalDate()
+        onDateChange(newDate)
+    }
+
+    picker.show(context.supportFragmentManager, "ExpiresOnDatePicker")
 }
