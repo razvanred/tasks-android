@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -67,6 +68,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -202,14 +205,16 @@ internal fun TaskDetails(
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            TaskDetailsAppBar(
-                navigateUp = { actioner(TaskDetailsUiAction.NavigateUp) },
-                deleteTask = {
-                    actioner(TaskDetailsUiAction.ShowConfirmDeleteDialog)
+            Column {
+                TaskDetailsAppBar(
+                    navigateUp = { actioner(TaskDetailsUiAction.NavigateUp) },
+                    deleteTask = {
+                        actioner(TaskDetailsUiAction.ShowConfirmDeleteDialog)
+                    }
+                )
+                if (uiState.loading) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
-            )
-            if (uiState.loading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
         },
         modifier = Modifier.fillMaxSize(),
@@ -271,10 +276,40 @@ private fun TaskDetailsContent(
         }
 
         item {
-            Text(
-                text = task.title,
-                style = MaterialTheme.typography.h5,
-                modifier = Modifier.padding(horizontal = 16.dp)
+            var title by rememberSaveable { mutableStateOf(task.title) }
+
+            val textColor = MaterialTheme.colors.onSurface
+            val textStyle = MaterialTheme.typography.h5.copy(color = textColor)
+
+            BasicTextField(
+                value = title,
+                onValueChange = { newValue ->
+                    title = newValue
+                    actioner(TaskDetailsUiAction.EditTitle(title = title))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    autoCorrect = true,
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done
+                ),
+                textStyle = textStyle,
+                decorationBox = { innerTextField ->
+                    Box {
+                        innerTextField()
+                        if (title.isEmpty()) {
+                            Text(
+                                text = stringResource(id = R.string.task_details_enter_title_placeholder),
+                                modifier = Modifier.alpha(ContentAlpha.medium),
+                                style = textStyle
+                            )
+                        }
+                    }
+                },
+                cursorBrush = SolidColor(textColor),
             )
         }
 

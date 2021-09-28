@@ -28,8 +28,10 @@ import app.sedici.tasks.domain.ObserveTaskById
 import app.sedici.tasks.domain.SetTaskDescriptionById
 import app.sedici.tasks.domain.SetTaskExpirationDateById
 import app.sedici.tasks.domain.SetTaskIsCheckedById
+import app.sedici.tasks.domain.SetTaskTitleById
 import app.sedici.tasks.model.TaskId
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -39,6 +41,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(FlowPreview::class)
 class TaskDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     observeTaskById: ObserveTaskById,
@@ -46,6 +49,7 @@ class TaskDetailsViewModel @Inject constructor(
     private val setTaskIsCheckedById: SetTaskIsCheckedById,
     private val setTaskDescriptionById: SetTaskDescriptionById,
     private val setTaskExpirationDateById: SetTaskExpirationDateById,
+    private val setTaskTitleById: SetTaskTitleById,
 ) : ViewModel() {
     private val taskId = TaskId(value = savedStateHandle.get<String>("taskId")!!)
 
@@ -171,6 +175,22 @@ class TaskDetailsViewModel @Inject constructor(
                         }
                     }
                 }
+            }
+            is TaskDetailsUiAction.EditTitle -> {
+                setTaskTitleById(
+                    id = taskId,
+                    title = uiAction.title
+                )
+                    .collect { status ->
+                        when (status) {
+                            InvokeStarted -> loadingState.addLoader()
+                            InvokeSuccess -> loadingState.removeLoader()
+                            is InvokeError -> {
+                                loadingState.removeLoader()
+                                _pendingSnackbarError.emit(TaskDetailsSnackbarError.UnknownError)
+                            }
+                        }
+                    }
             }
         }
     }

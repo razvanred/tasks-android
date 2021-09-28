@@ -67,6 +67,9 @@ interface TaskDao {
     @Query("UPDATE $Tasks SET expires_on = :expiresOn WHERE id = :id")
     suspend fun setExpiresOnById(id: TaskEntityId, expiresOn: OffsetDateTime?)
 
+    @Query("UPDATE $Tasks SET title = :title WHERE id = :id")
+    suspend fun setTitleById(id: TaskEntityId, title: String)
+
     companion object {
         @Language("RoomSql")
         private const val QUERY_GET_BY_ID = """

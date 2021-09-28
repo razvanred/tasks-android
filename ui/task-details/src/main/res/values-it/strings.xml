@@ -15,4 +15,5 @@
     <string name="task_details_edit_description_dialog_title">Modifica descrizione</string>
     <string name="task_details_expires_on_title_date_picker">Seleziona una data di scadenza</string>
     <string name="task_details_edit_button_cd">Modifica</string>
+    <string name="task_details_enter_title_placeholder">Inserisci titolo</string>
 </resources>

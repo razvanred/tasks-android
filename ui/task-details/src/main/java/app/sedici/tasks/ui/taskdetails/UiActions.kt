@@ -34,4 +34,6 @@ sealed interface TaskDetailsUiAction {
     object ShowExpirationDatePicker : TaskDetailsUiAction
     object DismissExpirationDatePicker : TaskDetailsUiAction
     data class EditExpirationDate(val expirationDate: LocalDate?) : TaskDetailsUiAction
+
+    data class EditTitle(val title: String) : TaskDetailsUiAction
 }

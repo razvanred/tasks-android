@@ -336,6 +336,20 @@ class TaskDaoTest {
             .isEqualTo(date)
     }
 
+    @Test
+    fun setTitleById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Hello Java")
+        val task2 = createTaskEntity(title = "Moving on")
+        val title = "Hello Kotlin"
+
+        taskDao.insert(listOf(task1, task2))
+
+        taskDao.setTitleById(id = task1.id, title = title)
+
+        assertThat(taskDao.getByIdOrNull(id = task1.id)?.title)
+            .isEqualTo(title)
+    }
+
     @After
     fun cleanup() {
         testScope.cleanupTestCoroutines()

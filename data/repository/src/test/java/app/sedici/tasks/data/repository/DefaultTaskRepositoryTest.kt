@@ -236,6 +236,24 @@ class DefaultTaskRepositoryTest {
             .isNull()
     }
 
+    @Test
+    fun setTaskTitleById_checkSuccess() = testScope.runBlockingTest {
+        val taskEntity1 = createTaskEntity(title = "Buy a secondary monitor")
+        val taskEntity2 = createTaskEntity(title = "Watch TV")
+
+        taskDao.insert(listOf(taskEntity1, taskEntity2))
+
+        val title = "Watch the finals"
+
+        taskRepository.setTaskTitleById(
+            id = taskEntity1.id.toTaskId(),
+            title = title
+        )
+
+        assertThat(taskRepository.getByIdOrNull(id = taskEntity1.id.toTaskId())?.title)
+            .isEqualTo(title)
+    }
+
     @After
     fun cleanup() {
         testScope.cleanupTestCoroutines()

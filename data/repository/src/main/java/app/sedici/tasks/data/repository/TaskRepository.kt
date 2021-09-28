@@ -43,6 +43,8 @@ interface TaskRepository {
 
     suspend fun setTaskExpirationDateById(id: TaskId, expirationDate: OffsetDateTime?)
 
+    suspend fun setTaskTitleById(id: TaskId, title: String)
+
     fun observeTasks(): Flow<List<Task>>
 
     fun observeTaskById(id: TaskId): Flow<Task?>
@@ -106,6 +108,13 @@ class DefaultTaskRepository @Inject constructor(
         taskDao.setExpiresOnById(
             id = id.toTaskEntityId(),
             expiresOn = expirationDate
+        )
+    }
+
+    override suspend fun setTaskTitleById(id: TaskId, title: String) {
+        taskDao.setTitleById(
+            id = id.toTaskEntityId(),
+            title = title
         )
     }
 }
