@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,7 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -40,6 +40,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
@@ -68,8 +69,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -79,6 +78,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.sedici.tasks.common.compose.BorderlessTextField
 import app.sedici.tasks.common.compose.TaskBottomBar
 import app.sedici.tasks.common.compose.collectInLaunchedEffect
 import app.sedici.tasks.common.compose.rememberFlowWithLifecycle
@@ -278,10 +278,7 @@ private fun TaskDetailsContent(
         item {
             var title by rememberSaveable { mutableStateOf(task.title) }
 
-            val textColor = MaterialTheme.colors.onSurface
-            val textStyle = MaterialTheme.typography.h5.copy(color = textColor)
-
-            BasicTextField(
+            BorderlessTextField(
                 value = title,
                 onValueChange = { newValue ->
                     title = newValue
@@ -296,20 +293,10 @@ private fun TaskDetailsContent(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Done
                 ),
-                textStyle = textStyle,
-                decorationBox = { innerTextField ->
-                    Box {
-                        innerTextField()
-                        if (title.isEmpty()) {
-                            Text(
-                                text = stringResource(id = R.string.task_details_enter_title_placeholder),
-                                modifier = Modifier.alpha(ContentAlpha.medium),
-                                style = textStyle
-                            )
-                        }
-                    }
-                },
-                cursorBrush = SolidColor(textColor),
+                textStyle = MaterialTheme.typography.h5,
+                placeholder = {
+                    Text(text = stringResource(R.string.task_details_enter_title_placeholder))
+                }
             )
         }
 
@@ -349,7 +336,7 @@ private fun TaskDescriptionItem(
     onEditClick: () -> Unit,
     onClearClick: () -> Unit,
 ) {
-    TaskDetailsItem(
+    TaskDetailsEditableTextItem(
         modifier = modifier,
         icon = {
             Icon(
@@ -371,8 +358,8 @@ private fun TaskExpirationDateItem(
     onEditClick: () -> Unit,
     onClearClick: () -> Unit,
 ) {
-    TaskDetailsItem(
-        modifier = modifier.clickable(onClick = onEditClick),
+    TaskDetailsEditableTextItem(
+        modifier = modifier,
         icon = {
             Icon(
                 imageVector = Icons.Default.Event,
@@ -387,7 +374,7 @@ private fun TaskExpirationDateItem(
 }
 
 @Composable
-private fun TaskDetailsItem(
+private fun TaskDetailsEditableTextItem(
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
     text: String,
@@ -395,55 +382,72 @@ private fun TaskDetailsItem(
     onEditClick: () -> Unit,
     onClearClick: () -> Unit,
 ) {
-    val textBlank = text.isBlank()
-
     CompositionLocalProvider(
-        LocalContentAlpha provides if (textBlank) ContentAlpha.medium else ContentAlpha.high,
-        content = {
-            Row(
-                modifier = modifier.padding(vertical = 16.dp, horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                if (icon != null) {
-                    Row(
-                        modifier = Modifier.size(24.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        icon()
-                    }
+        LocalContentAlpha provides if (text.isEmpty()) ContentAlpha.medium else ContentAlpha.high,
+        LocalTextStyle provides MaterialTheme.typography.body1
+    ) {
+        TaskDetailsItem(
+            modifier = modifier.clickable(onClick = onEditClick),
+            icon = icon,
+        ) {
+            Row(modifier = Modifier.weight(1f)) {
+                if (text.isEmpty()) {
+                    Text(text = placeholder)
+                } else {
+                    Text(text = text)
                 }
-                Text(
-                    text = if (textBlank) placeholder else text,
-                    style = MaterialTheme.typography.body1,
-                    modifier = Modifier.weight(1f)
-                )
-                if (textBlank) {
+            }
+            Row(modifier = Modifier.size(24.dp)) {
+                if (text.isEmpty()) {
                     IconButton(
-                        modifier = Modifier.size(24.dp),
+                        onClick = onEditClick,
                         content = {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = stringResource(R.string.task_details_edit_button_cd)
+                                contentDescription = stringResource(R.string.cd_edit)
                             )
                         },
-                        onClick = onEditClick
                     )
                 } else {
                     IconButton(
-                        modifier = Modifier.size(24.dp),
+                        onClick = onClearClick,
                         content = {
                             Icon(
                                 imageVector = Icons.Default.Clear,
                                 contentDescription = stringResource(R.string.cd_clear)
                             )
                         },
-                        onClick = onClearClick
                     )
                 }
             }
         }
-    )
+    }
+}
+
+@Composable
+private fun TaskDetailsItem(
+    modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Row(
+        modifier = modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        if (icon != null) {
+            Row(
+                modifier = Modifier.size(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                icon()
+            }
+        }
+        Row(
+            modifier = Modifier.weight(1f),
+            content = content
+        )
+    }
 }
 
 @Composable

@@ -6,4 +6,5 @@
     <string name="cd_clear">Elimina</string>
     <string name="cd_select_date">Seleziona data</string>
     <string name="cd_delete">Elimina</string>
+    <string name="cd_edit">Modifica</string>
 </resources>
