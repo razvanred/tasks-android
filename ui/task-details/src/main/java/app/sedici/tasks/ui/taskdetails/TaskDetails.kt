@@ -29,8 +29,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -46,12 +46,9 @@ import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -65,17 +62,22 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.sedici.tasks.common.compose.BorderlessTextField
@@ -170,24 +172,6 @@ internal fun TaskDetails(
         )
     }
 
-    if (uiState.showEditDescriptionDialog && task != null) {
-        var description by rememberSaveable { mutableStateOf(task.description) }
-
-        EditDescriptionDialog(
-            onConfirmClick = {
-                actioner(TaskDetailsUiAction.EditDescription(description = description))
-                actioner(TaskDetailsUiAction.DismissEditDescriptionDialog)
-            },
-            onCancelClick = {
-                actioner(TaskDetailsUiAction.DismissEditDescriptionDialog)
-            },
-            value = description,
-            onValueChange = { newValue ->
-                description = newValue
-            }
-        )
-    }
-
     val context = LocalContext.current as FragmentActivity
 
     if (uiState.showExpirationDatePicker && task != null) {
@@ -254,12 +238,6 @@ private fun TaskDetailsContent(
     task: Task,
     actioner: (TaskDetailsUiAction) -> Unit,
 ) {
-    val onEditDescriptionClick = {
-        actioner(TaskDetailsUiAction.ShowEditDescriptionDialog)
-    }
-    val onClearDescriptionClick = {
-        actioner(TaskDetailsUiAction.EditDescription(description = ""))
-    }
     val onEditExpirationDateClick = {
         actioner(TaskDetailsUiAction.ShowExpirationDatePicker)
     }
@@ -276,6 +254,7 @@ private fun TaskDetailsContent(
         }
 
         item {
+            val focusManager = LocalFocusManager.current
             var title by rememberSaveable { mutableStateOf(task.title) }
 
             BorderlessTextField(
@@ -296,25 +275,30 @@ private fun TaskDetailsContent(
                 textStyle = MaterialTheme.typography.h5,
                 placeholder = {
                     Text(text = stringResource(R.string.task_details_enter_title_placeholder))
-                }
+                },
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                    }
+                )
             )
         }
 
         item {
+            var description by rememberSaveable { mutableStateOf(task.description) }
+
             Column {
                 TaskDescriptionItem(
-                    modifier = Modifier
-                        .clickable(onClick = onEditDescriptionClick)
-                        .fillMaxWidth(),
-                    description = task.description,
-                    onEditClick = onEditDescriptionClick,
-                    onClearClick = onClearDescriptionClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    description = description,
+                    onDescriptionChange = {
+                        description = it
+                        actioner(TaskDetailsUiAction.EditDescription(description))
+                    },
                 )
                 Divider()
                 TaskExpirationDateItem(
-                    modifier = Modifier
-                        .clickable(onClick = onEditExpirationDateClick)
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     expiresOn = task.expiresOn,
                     onEditClick = onEditExpirationDateClick,
                     onClearClick = onClearExpirationDateClick,
@@ -333,10 +317,9 @@ private fun TaskDetailsContent(
 private fun TaskDescriptionItem(
     modifier: Modifier = Modifier,
     description: String,
-    onEditClick: () -> Unit,
-    onClearClick: () -> Unit,
+    onDescriptionChange: (String) -> Unit,
 ) {
-    TaskDetailsEditableTextItem(
+    TaskDetailsTextFieldItem(
         modifier = modifier,
         icon = {
             Icon(
@@ -344,10 +327,8 @@ private fun TaskDescriptionItem(
                 contentDescription = null
             )
         },
-        text = description,
-        placeholder = stringResource(R.string.task_details_no_description_provided_message),
-        onEditClick = onEditClick,
-        onClearClick = onClearClick
+        value = description,
+        onValueChange = onDescriptionChange,
     )
 }
 
@@ -424,6 +405,86 @@ private fun TaskDetailsEditableTextItem(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun TaskDetailsTextFieldItem(
+    modifier: Modifier = Modifier,
+    icon: (@Composable () -> Unit)? = null,
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    CompositionLocalProvider(
+        LocalContentAlpha provides if (value.isEmpty()) ContentAlpha.medium else ContentAlpha.high
+    ) {
+        TaskDetailsItem(
+            modifier = modifier,
+            icon = icon
+        ) {
+            Row(modifier = Modifier.weight(1f)) {
+                BorderlessTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        autoCorrect = true,
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    singleLine = false,
+                    placeholder = {
+                        Text(
+                            text = stringResource(
+                                R.string.task_details_no_description_provided_message
+                            )
+                        )
+                    },
+                    textStyle = MaterialTheme.typography.body1,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                        }
+                    )
+                )
+            }
+            Row(modifier = Modifier.size(24.dp)) {
+                if (value.isEmpty()) {
+                    IconButton(
+                        onClick = {
+                            focusRequester.requestFocus()
+                            keyboardController?.show()
+                        },
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(R.string.cd_edit)
+                            )
+                        },
+                    )
+                } else {
+                    IconButton(
+                        onClick = {
+                            onValueChange("")
+                        },
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = stringResource(R.string.cd_clear)
+                            )
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun TaskDetailsItem(
     modifier: Modifier = Modifier,
@@ -445,7 +506,9 @@ private fun TaskDetailsItem(
         }
         Row(
             modifier = Modifier.weight(1f),
-            content = content
+            content = content,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         )
     }
 }
@@ -556,61 +619,6 @@ private fun MarkAsNotCompletedButton(
             Text(text = stringResource(R.string.task_details_mark_task_as_not_completed_button))
         },
         onClick = onClick
-    )
-}
-
-@Composable
-private fun EditDescriptionDialog(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onConfirmClick: () -> Unit,
-    onCancelClick: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = { },
-        content = {
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colors.surface,
-                contentColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(32.dp),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.task_details_edit_description_dialog_title),
-                        style = MaterialTheme.typography.h6
-                    )
-                    TextField(
-                        value = value,
-                        onValueChange = onValueChange,
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences,
-                            keyboardType = KeyboardType.Text,
-                            autoCorrect = true,
-                            imeAction = ImeAction.Done
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextButton(onClick = onCancelClick) {
-                            Text(text = stringResource(android.R.string.cancel))
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = onConfirmClick) {
-                            Text(text = stringResource(R.string.task_details_confirm_edit_button))
-                        }
-                    }
-                }
-            }
-        }
     )
 }
 

@@ -24,7 +24,6 @@ data class TaskDetailsUiState(
     val task: Task?,
     val loading: Boolean,
     val showConfirmDeleteDialog: Boolean,
-    val showEditDescriptionDialog: Boolean,
     val showExpirationDatePicker: Boolean,
 ) {
     companion object {
@@ -32,7 +31,6 @@ data class TaskDetailsUiState(
             task = null,
             loading = false,
             showConfirmDeleteDialog = false,
-            showEditDescriptionDialog = false,
             showExpirationDatePicker = false,
         )
     }

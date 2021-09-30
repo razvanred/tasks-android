@@ -23,8 +23,6 @@ sealed interface TaskDetailsUiAction {
     object Delete : TaskDetailsUiAction
     object DismissConfirmDeleteDialog : TaskDetailsUiAction
 
-    object ShowEditDescriptionDialog : TaskDetailsUiAction
-    object DismissEditDescriptionDialog : TaskDetailsUiAction
     data class EditDescription(val description: String) : TaskDetailsUiAction
 
     object NavigateUp : TaskDetailsUiAction

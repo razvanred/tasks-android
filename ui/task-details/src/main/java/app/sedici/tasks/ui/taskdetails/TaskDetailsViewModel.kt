@@ -54,7 +54,6 @@ class TaskDetailsViewModel @Inject constructor(
     private val taskId = TaskId(value = savedStateHandle.get<String>("taskId")!!)
 
     private val showConfirmDeleteDialog = MutableStateFlow(false)
-    private val showEditDescriptionDialog = MutableStateFlow(false)
     private val showExpirationDatePicker = MutableStateFlow(false)
 
     private val pendingUiAction = MutableSharedFlow<TaskDetailsUiAction>()
@@ -71,14 +70,12 @@ class TaskDetailsViewModel @Inject constructor(
         observeTaskById.flow,
         showConfirmDeleteDialog,
         loadingState.observable,
-        showEditDescriptionDialog,
         showExpirationDatePicker,
-    ) { task, showConfirmDeleteDialog, loading, showEditDescriptionDialog, showExpirationDatePicker ->
+    ) { task, showConfirmDeleteDialog, loading, showExpirationDatePicker ->
         TaskDetailsUiState(
             showConfirmDeleteDialog = showConfirmDeleteDialog,
             loading = loading,
             task = task,
-            showEditDescriptionDialog = showEditDescriptionDialog,
             showExpirationDatePicker = showExpirationDatePicker,
         )
     }
@@ -113,12 +110,6 @@ class TaskDetailsViewModel @Inject constructor(
             }
             TaskDetailsUiAction.DismissConfirmDeleteDialog -> {
                 showConfirmDeleteDialog.emit(false)
-            }
-            TaskDetailsUiAction.ShowEditDescriptionDialog -> {
-                showEditDescriptionDialog.emit(true)
-            }
-            TaskDetailsUiAction.DismissEditDescriptionDialog -> {
-                showEditDescriptionDialog.emit(false)
             }
             TaskDetailsUiAction.NavigateUp -> {
                 _pendingUiDestination.emit(TaskDetailsDestination.Up)
