@@ -288,7 +288,7 @@ private fun TaskDetailsContent(
             var description by rememberSaveable { mutableStateOf(task.description) }
 
             Column {
-                TaskDescriptionItem(
+                NotesField(
                     modifier = Modifier.fillMaxWidth(),
                     description = description,
                     onDescriptionChange = {
@@ -297,7 +297,7 @@ private fun TaskDetailsContent(
                     },
                 )
                 Divider()
-                TaskExpirationDateItem(
+                DateField(
                     modifier = Modifier.fillMaxWidth(),
                     expiresOn = task.expiresOn,
                     onEditClick = onEditExpirationDateClick,
@@ -314,7 +314,7 @@ private fun TaskDetailsContent(
 }
 
 @Composable
-private fun TaskDescriptionItem(
+private fun NotesField(
     modifier: Modifier = Modifier,
     description: String,
     onDescriptionChange: (String) -> Unit,
@@ -333,7 +333,7 @@ private fun TaskDescriptionItem(
 }
 
 @Composable
-private fun TaskExpirationDateItem(
+private fun DateField(
     modifier: Modifier = Modifier,
     expiresOn: LocalDate?,
     onEditClick: () -> Unit,
@@ -348,7 +348,7 @@ private fun TaskExpirationDateItem(
             )
         },
         text = expiresOn?.toString() ?: "",
-        placeholder = stringResource(R.string.task_details_no_expiration_date_provided_message),
+        placeholder = stringResource(R.string.task_details_add_date_message),
         onEditClick = onEditClick,
         onClearClick = onClearClick
     )
@@ -441,7 +441,7 @@ private fun TaskDetailsTextFieldItem(
                     placeholder = {
                         Text(
                             text = stringResource(
-                                R.string.task_details_no_description_provided_message
+                                R.string.task_details_add_notes_message
                             )
                         )
                     },

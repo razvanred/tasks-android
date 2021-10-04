@@ -6,8 +6,8 @@
     <string name="task_details_delete_task_confirm_dialog_cancel_button">@android:string/cancel</string>
     <string name="task_details_delete_task_confirm_dialog_delete_button">Șterge</string>
     <string name="task_details_error_while_deleting_message">S-a verificat o eroare la ștergerea activități</string>
-    <string name="task_details_no_description_provided_message">Nicio descriere furnizată</string>
-    <string name="task_details_no_expiration_date_provided_message">Nicio dată de expirare furnizată</string>
+    <string name="task_details_add_notes_message">Adăugați notițe</string>
+    <string name="task_details_add_date_message">Adăugați dată</string>
     <string name="task_details_mark_task_as_not_completed_button">Marcați ca nefinalizat</string>
     <string name="task_details_mark_task_as_completed_button">Marcați ca finalizat</string>
     <string name="task_details_unknown_error_message">Eroare necunoscută</string>
