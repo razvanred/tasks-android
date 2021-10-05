@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,7 +40,6 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
@@ -80,6 +81,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.sedici.tasks.common.compose.AutoSizedCircularProgressIndicator
 import app.sedici.tasks.common.compose.BorderlessTextField
 import app.sedici.tasks.common.compose.TaskBottomBar
 import app.sedici.tasks.common.compose.collectInLaunchedEffect
@@ -189,17 +191,13 @@ internal fun TaskDetails(
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            Column {
-                TaskDetailsAppBar(
-                    navigateUp = { actioner(TaskDetailsUiAction.NavigateUp) },
-                    deleteTask = {
-                        actioner(TaskDetailsUiAction.ShowConfirmDeleteDialog)
-                    }
-                )
-                if (uiState.loading) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-            }
+            TaskDetailsAppBar(
+                navigateUp = { actioner(TaskDetailsUiAction.NavigateUp) },
+                deleteTask = {
+                    actioner(TaskDetailsUiAction.ShowConfirmDeleteDialog)
+                },
+                isLoading = uiState.loading
+            )
         },
         modifier = Modifier.fillMaxSize(),
         content = { contentPadding ->
@@ -518,6 +516,7 @@ private fun TaskDetailsAppBar(
     modifier: Modifier = Modifier,
     navigateUp: () -> Unit,
     deleteTask: () -> Unit,
+    isLoading: Boolean,
 ) {
     TopAppBar(
         modifier = modifier,
@@ -534,6 +533,15 @@ private fun TaskDetailsAppBar(
             )
         },
         actions = {
+            if (isLoading) {
+                AutoSizedCircularProgressIndicator(
+                    modifier = Modifier
+                        .aspectRatio(1f)
+                        .fillMaxHeight()
+                        .padding(16.dp)
+                )
+            }
+
             IconButton(
                 content = {
                     Icon(
