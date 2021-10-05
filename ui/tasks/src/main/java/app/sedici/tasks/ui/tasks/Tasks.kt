@@ -21,15 +21,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
-import androidx.compose.material.ExtendedFloatingActionButton
-import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -47,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.sedici.tasks.common.compose.TaskBottomBar
 import app.sedici.tasks.common.compose.collectInLaunchedEffect
 import app.sedici.tasks.common.compose.rememberFlowWithLifecycle
 import app.sedici.tasks.model.Task
@@ -110,23 +112,6 @@ internal fun Tasks(
             }
         },
         modifier = Modifier.fillMaxSize(),
-        floatingActionButtonPosition = FabPosition.Center,
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                text = {
-                    Text(text = stringResource(R.string.tasks_screen_button_add_task))
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null
-                    )
-                },
-                onClick = {
-                    openCreateTask()
-                }
-            )
-        },
         content = { contentPadding ->
             Tasks(
                 modifier = Modifier
@@ -134,6 +119,12 @@ internal fun Tasks(
                     .padding(contentPadding),
                 tasks = uiState.tasks,
                 actioner = actioner,
+            )
+        },
+        bottomBar = {
+            TasksBottomBar(
+                modifier = Modifier.fillMaxWidth(),
+                openCreateTask = openCreateTask
             )
         }
     )
@@ -197,6 +188,27 @@ internal fun Task(
                 Text(text = task.description, style = MaterialTheme.typography.body2)
             }
         }
+    }
+}
+
+@Composable
+private fun TasksBottomBar(
+    modifier: Modifier = Modifier,
+    openCreateTask: () -> Unit,
+) {
+    TaskBottomBar(modifier = modifier) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            content = {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = stringResource(R.string.tasks_screen_button_add_task))
+            },
+            onClick = openCreateTask
+        )
     }
 }
 
