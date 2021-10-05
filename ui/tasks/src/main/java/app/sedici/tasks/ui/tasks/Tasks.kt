@@ -25,21 +25,27 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -113,7 +119,7 @@ internal fun Tasks(
         },
         modifier = Modifier.fillMaxSize(),
         content = { contentPadding ->
-            Tasks(
+            TasksContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(contentPadding),
@@ -131,7 +137,26 @@ internal fun Tasks(
 }
 
 @Composable
-internal fun Tasks(
+private fun TasksContent(
+    modifier: Modifier = Modifier,
+    tasks: List<Task>,
+    actioner: (UiAction) -> Unit,
+) {
+    if (tasks.isEmpty()) {
+        AllTasksDone(
+            modifier = modifier
+        )
+    } else {
+        TaskList(
+            modifier = modifier,
+            tasks = tasks,
+            actioner = actioner
+        )
+    }
+}
+
+@Composable
+private fun TaskList(
     modifier: Modifier = Modifier,
     tasks: List<Task>,
     actioner: (UiAction) -> Unit,
@@ -209,6 +234,49 @@ private fun TasksBottomBar(
             },
             onClick = openCreateTask
         )
+    }
+}
+
+@Composable
+private fun AllTasksDone(
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        item {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(16.dp)
+            ) {
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colors.primary
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(56.dp)
+                    )
+
+                    Text(
+                        text = stringResource(R.string.tasks_screen_all_tasks_done_title),
+                        style = MaterialTheme.typography.h4
+                    )
+                }
+
+                CompositionLocalProvider(
+                    LocalContentAlpha provides ContentAlpha.medium
+                ) {
+                    Text(
+                        text = stringResource(R.string.tasks_screen_all_tasks_done_message),
+                        style = MaterialTheme.typography.subtitle2,
+                    )
+                }
+            }
+        }
     }
 }
 

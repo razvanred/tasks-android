@@ -2,4 +2,6 @@
 <resources>
     <string name="tasks_screen_title">Activitați</string>
     <string name="tasks_screen_button_add_task">Adaugați activitate</string>
+    <string name="tasks_screen_all_tasks_done_title">Totul făcut!</string>
+    <string name="tasks_screen_all_tasks_done_message">Adăugați o nouă activitate pentru a începe</string>
 </resources>

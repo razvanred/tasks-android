@@ -2,4 +2,6 @@
 <resources>
     <string name="tasks_screen_title">Attività</string>
     <string name="tasks_screen_button_add_task">Aggiungi attività</string>
+    <string name="tasks_screen_all_tasks_done_title">Tutto fatto!</string>
+    <string name="tasks_screen_all_tasks_done_message">Aggiungi una nuova attività per cominciare</string>
 </resources>
