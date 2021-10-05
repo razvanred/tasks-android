@@ -28,6 +28,7 @@ import app.sedici.tasks.domain.SetTaskIsCheckedById
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -42,6 +43,9 @@ internal class TasksViewModel @Inject constructor(
     private val pendingActions = MutableSharedFlow<UiAction>()
 
     private val loadingState = ObservableLoadingCounter()
+
+    private val _pendingUiDestination = MutableSharedFlow<UiDestination>()
+    val pendingUiDestination = _pendingUiDestination.asSharedFlow()
 
     val uiState = combine(
         observeTasks.flow,
@@ -59,6 +63,11 @@ internal class TasksViewModel @Inject constructor(
                             id = uiAction.taskId,
                             isChecked = uiAction.checked
                         ).watchStatus()
+                    }
+                    is UiAction.ShowTaskDetails -> {
+                        _pendingUiDestination.emit(
+                            UiDestination.TaskDetails(taskId = uiAction.taskId)
+                        )
                     }
                 }
             }

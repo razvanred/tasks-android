@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.tasks.internal
+package app.sedici.tasks.domain
 
+import app.sedici.tasks.data.repository.TaskRepository
+import app.sedici.tasks.model.Task
 import app.sedici.tasks.model.TaskId
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-internal sealed interface UiAction {
-    data class EditTaskIsChecked(val taskId: TaskId, val checked: Boolean) : UiAction
+class ObserveTaskById @Inject constructor(
+    private val taskRepository: TaskRepository,
+) : SubjectInteractor<ObserveTaskById.Params, Task?>() {
 
-    data class ShowTaskDetails(val taskId: TaskId) : UiAction
+    override fun createObservable(params: Params): Flow<Task?> =
+        taskRepository.observeTaskById(id = params.id)
+
+    operator fun invoke(id: TaskId) = invoke(Params(id = id))
+
+    data class Params(val id: TaskId)
 }

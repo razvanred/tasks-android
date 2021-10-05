@@ -15,6 +15,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -39,6 +40,7 @@ dependencies {
     implementation(libs.compose.material.material)
     implementation(libs.compose.animation.animation)
     implementation(libs.compose.ui.tooling)
+    implementation(libs.compose.material.iconsext)
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.dagger.hilt.android)
@@ -46,4 +48,8 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.common.java8)
+
+    implementation(libs.google.android.material.material)
+
+    coreLibraryDesugaring(libs.android.tools.desugar)
 }

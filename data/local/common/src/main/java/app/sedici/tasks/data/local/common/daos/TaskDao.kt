@@ -26,6 +26,7 @@ import app.sedici.tasks.data.local.common.model.TaskEntity
 import app.sedici.tasks.data.local.common.model.TaskEntityId
 import kotlinx.coroutines.flow.Flow
 import org.intellij.lang.annotations.Language
+import java.time.OffsetDateTime
 import app.sedici.tasks.data.local.common.model.TaskEntity.Companion.TableName as Tasks
 
 @Dao
@@ -56,6 +57,18 @@ interface TaskDao {
 
     @Query("UPDATE $Tasks SET is_checked = :isChecked WHERE id = :id")
     suspend fun setIsCheckedById(id: TaskEntityId, isChecked: Boolean)
+
+    @Query("UPDATE $Tasks SET description = :description WHERE id = :id")
+    suspend fun setDescriptionById(id: TaskEntityId, description: String)
+
+    @Query(QUERY_GET_BY_ID)
+    fun observeById(id: TaskEntityId): Flow<TaskEntity?>
+
+    @Query("UPDATE $Tasks SET expires_on = :expiresOn WHERE id = :id")
+    suspend fun setExpiresOnById(id: TaskEntityId, expiresOn: OffsetDateTime?)
+
+    @Query("UPDATE $Tasks SET title = :title WHERE id = :id")
+    suspend fun setTitleById(id: TaskEntityId, title: String)
 
     companion object {
         @Language("RoomSql")

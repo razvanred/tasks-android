@@ -29,6 +29,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 
@@ -254,6 +257,97 @@ class TaskDaoTest {
         taskDao.deleteById(task3.id)
 
         assertThat(taskDao.getAll()).containsExactly(task1, task2)
+    }
+
+    @Test
+    fun observeById_checkEmission() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Play with Emma at the park")
+        val task2 = createTaskEntity(title = "Buy a bicycle")
+
+        taskDao.insert(listOf(task1, task2))
+
+        taskDao.observeById(task1.id).test {
+            assertThat(awaitItem()?.id).isEqualTo(task1.id)
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun observeById_withoutTask_checkNullEmission() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Play with Emma at the park")
+        val task2 = createTaskEntity(title = "Buy a bicycle")
+
+        taskDao.insert(listOf(task2))
+
+        taskDao.observeById(task1.id).test {
+            assertThat(awaitItem()).isNull()
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun setDescriptionById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Go to the gym")
+        val task2 = createTaskEntity(title = "Doctor appointment")
+
+        taskDao.insert(listOf(task1, task2))
+
+        val description = "Get another appointment for the next time"
+
+        taskDao.setDescriptionById(description = description, id = task2.id)
+
+        assertThat(taskDao.getByIdOrNull(id = task2.id)?.description)
+            .isEqualTo(description)
+    }
+
+    @Test
+    fun removeExpirationDateById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(
+            title = "Hello world",
+            expiresOn = OffsetDateTime.of(
+                LocalDateTime.of(2020, 1, 6, 0, 0),
+                ZoneOffset.UTC
+            )
+        )
+
+        taskDao.insert(task1)
+
+        taskDao.setExpiresOnById(id = task1.id, expiresOn = null)
+
+        assertThat(taskDao.getByIdOrNull(task1.id)?.expiresOn)
+            .isNull()
+    }
+
+    @Test
+    fun setExpirationDateById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(
+            title = "Hello world",
+        )
+        val date = OffsetDateTime.of(
+            LocalDateTime.of(2022, 1, 6, 0, 0),
+            ZoneOffset.UTC
+        )
+
+        taskDao.insert(task1)
+
+        taskDao.setExpiresOnById(id = task1.id, expiresOn = date)
+
+        assertThat(taskDao.getByIdOrNull(task1.id)?.expiresOn)
+            .isEqualTo(date)
+    }
+
+    @Test
+    fun setTitleById_checkSuccess() = testScope.runBlockingTest {
+        val task1 = createTaskEntity(title = "Hello Java")
+        val task2 = createTaskEntity(title = "Moving on")
+        val title = "Hello Kotlin"
+
+        taskDao.insert(listOf(task1, task2))
+
+        taskDao.setTitleById(id = task1.id, title = title)
+
+        assertThat(taskDao.getByIdOrNull(id = task1.id)?.title)
+            .isEqualTo(title)
     }
 
     @After

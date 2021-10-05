@@ -26,7 +26,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import io.mockk.every
-import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
@@ -42,7 +42,7 @@ import kotlin.time.ExperimentalTime
 @HiltAndroidTest
 @Config(application = HiltTestApplication::class)
 @OptIn(ExperimentalTime::class)
-class ObserveTasksTest {
+class ObserveTaskByIdTest {
 
     @get:Rule
     val hiltRule by lazy { HiltAndroidRule(this) }
@@ -61,44 +61,75 @@ class ObserveTasksTest {
     }
 
     @Test
-    fun invoke_checkSuccess() = testScope.runBlockingTest {
-        val observeTasks = ObserveTasks(taskRepository = taskRepository)
+    fun invoke_checkEmission() = testScope.runBlockingTest {
+        val observeTaskById = ObserveTaskById(taskRepository = taskRepository)
 
-        val newTask1 = NewTask(title = "Lie on the sofa", description = "", expiresOn = null)
+        val newTask1 = NewTask(
+            title = "Go to the cinema",
+            description = "Dune is available for the next 3 days",
+            expiresOn = null
+        )
         val newTask2 = NewTask(
-            title = "Finish Androids book",
-            description = "Written by Chet Haase",
+            title = "Finish Dune book",
+            description = "",
             expiresOn = null
         )
 
-        observeTasks()
+        val newTask1Id = taskRepository.saveNewTask(newTask = newTask1)
+        taskRepository.saveNewTask(newTask = newTask2)
 
-        observeTasks.flow.test {
-            val task1Id = taskRepository.saveNewTask(newTask1)
-            val task2Id = taskRepository.saveNewTask(newTask2)
-            taskRepository.deleteTask(id = task1Id)
+        observeTaskById(id = newTask1Id)
 
-            assertThat(awaitItem()).isEmpty()
-            assertThat(awaitItem().map { it.id }).containsExactly(task1Id)
-            assertThat(awaitItem().map { it.id }).containsExactly(task2Id, task1Id)
-            assertThat(awaitItem().map { it.id }).containsExactly(task2Id)
+        observeTaskById.flow.test {
+            assertThat(awaitItem()?.id).isEqualTo(newTask1Id)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 
+    @Test
+    fun invoke_withoutTask_checkNullEmission() = testScope.runBlockingTest {
+        val observeTaskById = ObserveTaskById(taskRepository = taskRepository)
+
+        val newTask1 = NewTask(
+            title = "Go to the cinema",
+            description = "Dune is available for the next 3 days",
+            expiresOn = null
+        )
+
+        val newTask1Id = taskRepository.saveNewTask(newTask = newTask1)
+        taskRepository.deleteTask(id = newTask1Id)
+
+        observeTaskById(id = newTask1Id)
+
+        observeTaskById.flow.test {
+            assertThat(awaitItem()?.id).isNull()
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun invoke_withFailingRepository_checkFailureEmission() = testScope.runBlockingTest {
-        val taskRepository: TaskRepository = mockk()
+        val taskRepository: TaskRepository = spyk(taskRepository)
 
-        every { taskRepository.observeTasks() }.throws(RuntimeException("Stub!"))
+        val newTask1 = NewTask(
+            title = "Go to the cinema",
+            description = "Dune is available for the next 3 days",
+            expiresOn = null
+        )
 
-        val observeTasks = ObserveTasks(taskRepository = taskRepository)
+        val newTask1Id = taskRepository.saveNewTask(newTask = newTask1)
+        taskRepository.deleteTask(id = newTask1Id)
 
-        observeTasks()
+        every { taskRepository.observeTaskById(id = newTask1Id) }
+            .throws(RuntimeException("Stub!"))
 
-        observeTasks.flow.test {
+        val observeTaskById = ObserveTaskById(taskRepository = taskRepository)
+
+        observeTaskById(newTask1Id)
+
+        observeTaskById.flow.test {
             assertThat(awaitError().message).isEqualTo("Stub!")
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

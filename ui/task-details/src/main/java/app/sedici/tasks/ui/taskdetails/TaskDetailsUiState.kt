@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.tasks.internal
+package app.sedici.tasks.ui.taskdetails
 
-import app.sedici.tasks.model.TaskId
+import androidx.compose.runtime.Stable
+import app.sedici.tasks.model.Task
 
-internal sealed interface UiAction {
-    data class EditTaskIsChecked(val taskId: TaskId, val checked: Boolean) : UiAction
-
-    data class ShowTaskDetails(val taskId: TaskId) : UiAction
+@Stable
+data class TaskDetailsUiState(
+    val task: Task?,
+    val loading: Boolean,
+    val showConfirmDeleteDialog: Boolean,
+    val showExpirationDatePicker: Boolean,
+) {
+    companion object {
+        val Empty = TaskDetailsUiState(
+            task = null,
+            loading = false,
+            showConfirmDeleteDialog = false,
+            showExpirationDatePicker = false,
+        )
+    }
 }

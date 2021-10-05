@@ -63,6 +63,7 @@ dependencies {
 
     implementation(projects.ui.tasks)
     implementation(projects.ui.createTask)
+    implementation(projects.ui.taskDetails)
 
     implementation(projects.data.repository)
     implementation(projects.domain)
@@ -80,7 +81,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.dagger.hilt.android)
-    implementation(libs.androidx.hilt.navigationCompose)
+    implementation(libs.androidx.hilt.navigation.compose)
     kapt(libs.dagger.hilt.compiler)
 
     debugImplementation(projects.data.local.android.ondevice) // TODO remove

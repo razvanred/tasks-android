@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="task_details_screen_title">Detalii activitate</string>
+    <string name="task_details_delete_task_confirm_dialog_title">Eliminați activitatea?</string>
+    <string name="task_details_delete_task_confirm_dialog_message">Activitatea va fi ștearsă de pe dispozitiv</string>
+    <string name="task_details_delete_task_confirm_dialog_cancel_button">@android:string/cancel</string>
+    <string name="task_details_delete_task_confirm_dialog_delete_button">Șterge</string>
+    <string name="task_details_error_while_deleting_message">S-a verificat o eroare la ștergerea activități</string>
+    <string name="task_details_add_notes_message">Adăugați notițe</string>
+    <string name="task_details_add_date_message">Adăugați dată</string>
+    <string name="task_details_mark_task_as_not_completed_button">Marcați ca nefinalizat</string>
+    <string name="task_details_mark_task_as_completed_button">Marcați ca finalizat</string>
+    <string name="task_details_unknown_error_message">Eroare necunoscută</string>
+    <string name="task_details_confirm_edit_button">Editați</string>
+    <string name="task_details_edit_description_dialog_title">Editați descriere</string>
+    <string name="task_details_expires_on_title_date_picker">Selectați o dată de expirare</string>
+    <string name="task_details_edit_button_cd">Editează</string>
+    <string name="task_details_enter_title_placeholder">Introduceți titlul</string>
+</resources>

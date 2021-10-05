@@ -43,7 +43,7 @@ dependencies {
     implementation(libs.compose.ui.tooling)
     implementation(libs.compose.material.iconsext)
 
-    implementation(libs.androidx.hilt.navigationCompose)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.compiler)
 

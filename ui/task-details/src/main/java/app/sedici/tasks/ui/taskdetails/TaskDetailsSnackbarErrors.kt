@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package app.sedici.tasks.ui.tasks.internal
+package app.sedici.tasks.ui.taskdetails
 
-import app.sedici.tasks.model.TaskId
+sealed interface TaskDetailsSnackbarError {
+    object ErrorWhileDeleting : TaskDetailsSnackbarError
 
-internal sealed interface UiAction {
-    data class EditTaskIsChecked(val taskId: TaskId, val checked: Boolean) : UiAction
-
-    data class ShowTaskDetails(val taskId: TaskId) : UiAction
+    object UnknownError : TaskDetailsSnackbarError
 }

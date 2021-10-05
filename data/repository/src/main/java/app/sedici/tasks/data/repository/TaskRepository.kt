@@ -37,9 +37,17 @@ interface TaskRepository {
 
     suspend fun setTaskIsCheckedById(id: TaskId, isChecked: Boolean)
 
+    suspend fun setTaskDescriptionById(id: TaskId, description: String)
+
     suspend fun getByIdOrNull(id: TaskId): Task?
 
+    suspend fun setTaskExpirationDateById(id: TaskId, expirationDate: OffsetDateTime?)
+
+    suspend fun setTaskTitleById(id: TaskId, title: String)
+
     fun observeTasks(): Flow<List<Task>>
+
+    fun observeTaskById(id: TaskId): Flow<Task?>
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -88,4 +96,25 @@ class DefaultTaskRepository @Inject constructor(
 
     override suspend fun getByIdOrNull(id: TaskId): Task? =
         taskDao.getByIdOrNull(id = id.toTaskEntityId())?.toTask()
+
+    override fun observeTaskById(id: TaskId): Flow<Task?> =
+        taskDao.observeById(id = id.toTaskEntityId()).map { entity -> entity?.toTask() }
+
+    override suspend fun setTaskDescriptionById(id: TaskId, description: String) {
+        taskDao.setDescriptionById(id = id.toTaskEntityId(), description = description)
+    }
+
+    override suspend fun setTaskExpirationDateById(id: TaskId, expirationDate: OffsetDateTime?) {
+        taskDao.setExpiresOnById(
+            id = id.toTaskEntityId(),
+            expiresOn = expirationDate
+        )
+    }
+
+    override suspend fun setTaskTitleById(id: TaskId, title: String) {
+        taskDao.setTitleById(
+            id = id.toTaskEntityId(),
+            title = title
+        )
+    }
 }

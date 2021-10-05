@@ -18,8 +18,6 @@ package app.sedici.tasks.ui.tasks.internal
 
 import app.sedici.tasks.model.TaskId
 
-internal sealed interface UiAction {
-    data class EditTaskIsChecked(val taskId: TaskId, val checked: Boolean) : UiAction
-
-    data class ShowTaskDetails(val taskId: TaskId) : UiAction
+internal sealed interface UiDestination {
+    data class TaskDetails(val taskId: TaskId) : UiDestination
 }
