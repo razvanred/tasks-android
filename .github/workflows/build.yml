@@ -6,7 +6,15 @@ on:
   pull_request:
 
 jobs:
+  gradlew-validation:
+    name: "Gradle Wrapper Validation"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@v1
+
   jvm:
+    needs: gradlew-validation
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
