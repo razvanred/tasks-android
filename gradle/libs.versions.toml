@@ -10,7 +10,7 @@ kotlinxcoroutines = "1.5.1"
 mockk = "1.12.0"
 
 [libraries]
-android-gp = "com.android.tools.build:gradle:7.1.0-alpha13"
+android-gp = "com.android.tools.build:gradle:7.1.0-beta01"
 
 kotlin-gp = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
