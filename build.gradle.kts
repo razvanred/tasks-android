@@ -37,11 +37,6 @@ allprojects {
             target("**/*.gradle.kts")
             ktlint(libs.versions.ktlint.get())
         }
-
-        groovyGradle {
-            target("**/*.gradle")
-            greclipse()
-        }
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
