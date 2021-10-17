@@ -209,8 +209,10 @@ internal fun Task(
             modifier = Modifier.weight(1f)
         ) {
             Text(text = task.title)
-            if (task.description.isNotBlank()) {
-                Text(text = task.description, style = MaterialTheme.typography.body2)
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                if (task.description.isNotBlank()) {
+                    Text(text = task.description, style = MaterialTheme.typography.body2)
+                }
             }
         }
     }
