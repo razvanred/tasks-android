@@ -2,7 +2,7 @@
 kotlin = "1.5.31"
 compose = "1.1.0-alpha06"
 ktlint = "0.41.0"
-room = "2.4.0-alpha04"
+room = "2.5.0"
 dagger = "2.38.1"
 androidxhilt = "1.0.0"
 androidxlifecycle = "2.4.0-alpha03"
